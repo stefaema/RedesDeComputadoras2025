@@ -53,83 +53,104 @@
 ---
 
 ## Procedimientos para Configuración y Administración de la Red
-## 🔹 a. Conectar una PC al puerto de consola del switch Cisco a 9600 baudios utilizando PUTTY
 
-- [ ] Conectar un cable **console** (RJ-45 a DB-9 o USB) entre el puerto de consola del switch y la PC.
-- [ ] Si es necesario, instalar los **drivers** del adaptador USB a serial en la PC.
-- [ ] Abrir el **Administrador de Dispositivos** en Windows y verificar el número del puerto COM asignado.
-- [ ] Descargar e instalar **PuTTY** si aún no está instalado.
-- [ ] Abrir **PuTTY** y configurar:
-  - [ ] Tipo de conexión: **Serial**
-  - [ ] Puerto **COM** detectado previamente
-  - [ ] Velocidad (Baudrate): **9600**
-  - [ ] Datos: **8 bits**
-  - [ ] Paridad: **Ninguna**
-  - [ ] Bits de parada: **1**
-  - [ ] Control de flujo: **Ninguno**
-- [ ] Hacer clic en **Abrir** para iniciar la sesión.
-- [ ] Presionar **Enter** si no aparece el prompt del switch inmediatamente.
-
----
+### a. Conectar una PC al puerto de consola del switch Cisco a 9600 baudios utilizando PuTTY
+- [ ] **Preparar conexión física:**
+  - [ ] Conectar el cable de consola (RJ-45 a DB-9 o USB a RJ-45) entre la PC y el switch.
+  - [ ] Verificar el puerto COM asignado en la PC (p. ej., usando el Administrador de Dispositivos).
+- [ ] **Configurar y abrir PuTTY:**
+  - [ ] Ejecutar PuTTY.
+  - [ ] Seleccionar el modo **Serial**.
+  - [ ] Ingresar los parámetros:
+    - **Puerto COM:** (ejemplo: COM3)
+    - **Baud rate:** 9600
+    - **Data bits:** 8
+    - **Parity:** Ninguna
+    - **Stop bits:** 1
+    - **Flow control:** Ninguno
+  - [ ] (Opcional) Iniciar PuTTY desde la línea de comandos:
+    ```
+    putty.exe -serial COM3 -sercfg 9600,8,n,1,N
+    ```
 
 ### b. Acceder a las opciones de administración del switch y modificar claves de acceso
-
-- [ ] Conectar la PC al switch mediante **consola** (ver procedimiento a).
-- [ ] Iniciar sesión en el switch. Si hay una contraseña establecida, ingresarla.
-- [ ] Acceder al modo privilegiado con:
-  - [ ] `enable` (y escribir la contraseña si se solicita).
-- [ ] Entrar en modo de configuración global:
-  - [ ] `configure terminal`
-- [ ] Cambiar la contraseña de acceso al modo privilegiado:
-  - [ ] `enable secret NUEVA_CONTRASEÑA`
-- [ ] Cambiar la contraseña de acceso por consola:
-  - [ ] `line console 0`
-  - [ ] `password NUEVA_CONTRASEÑA`
-  - [ ] `login`
-  - [ ] `exit`
-- [ ] Cambiar la contraseña de acceso por Telnet/SSH:
-  - [ ] `line vty 0 4`
-  - [ ] `password NUEVA_CONTRASEÑA`
-  - [ ] `login`
-  - [ ] `exit`
-- [ ] Guardar los cambios:
-  - [ ] `write memory` o `copy running-config startup-config`
-- [ ] Salir de la configuración:
-  - [ ] `exit`
-
----
+- [ ] **Acceder al switch:**
+  - [ ] Conectar la PC al switch (vía consola o mediante conexión Ethernet a la IP de administración).
+  - [ ] Iniciar sesión usando PuTTY (o navegador si es vía web).
+- [ ] **Ingresar al modo privilegiado y de configuración:**
+  - [ ] Ingresar el comando para modo privilegiado:
+    ```
+    enable
+    ```
+  - [ ] Entrar al modo de configuración global:
+    ```
+    configure terminal
+    ```
+- [ ] **Modificar claves de acceso:**
+  - [ ] Cambiar la contraseña del modo privilegiado:
+    ```
+    enable secret [nueva_contraseña]
+    ```
+  - [ ] (Opcional) Configurar contraseñas para acceso remoto (línea VTY):
+    ```
+    line vty 0 15
+    password [nueva_contraseña_vty]
+    login
+    exit
+    ```
+- [ ] **Guardar la configuración:**
+  - [ ] Ejecutar:
+    ```
+    copy running-config startup-config
+    ```
 
 ### c. Conectar dos computadoras al switch, configurar una red y testear conectividad
+- [ ] **Conexión física:**
+  - [ ] Conectar cada computadora a un puerto del switch usando cables Ethernet.
+  - [ ] Verificar que las luces de enlace en los puertos estén activas.
+- [ ] **Configurar direcciones IP en cada computadora:**
+  - [ ] En PC1, asignar una IP estática (ejemplo: 192.168.1.10/24) o configurar DHCP.
+  - [ ] En PC2, asignar una IP estática (ejemplo: 192.168.1.11/24) o configurar DHCP.
+  - [ ] (Opcional) Revisar la configuración actual:
+    - En Windows:
+      ```
+      ipconfig /all
+      ```
+    - En Linux/Mac:
+      ```
+      ifconfig
+      ```
+- [ ] **Testear conectividad:**
+  - [ ] En PC1, abrir la terminal y ejecutar:
+    ```
+    ping 192.168.1.11
+    ```
+  - [ ] Verificar que se reciben respuestas de PC2.
 
-- [ ] Conectar ambas computadoras a **puertos diferentes** del switch con cables Ethernet.
-- [ ] Acceder a la interfaz del switch (ver procedimiento a).
-- [ ] Verificar las interfaces activas con:
-  - [ ] `show ip interface brief`
-- [ ] Configurar cada PC con direcciones IP dentro de la misma subred:
-  - [ ] PC1: `192.168.1.10/24`, Gateway: `192.168.1.1`
-  - [ ] PC2: `192.168.1.11/24`, Gateway: `192.168.1.1`
-- [ ] Comprobar la conectividad entre las PCs:
-  - [ ] Abrir **Símbolo del sistema** o **Terminal** en PC1.
-  - [ ] Ejecutar `ping 192.168.1.11`.
-  - [ ] Si la respuesta es satisfactoria, la conexión es exitosa.
+### d. Configurar un puerto del switch en modo mirroring y monitorear, con una tercera computadora, el tráfico entre las dos computadoras conectadas en el procedimiento c.
+- [ ] **Conexión física:**
+  - [ ] Conectar la tercera computadora al switch usando un cable Ethernet.
+- [ ] **Configurar port mirroring en el switch:**
+  - [ ] Acceder al modo de configuración:
+    ```
+    configure terminal
+    ```
+  - [ ] Configurar la sesión de monitorización (ejemplo: sesión 1):
+    - [ ] Establecer el puerto fuente (por ejemplo, GigabitEthernet0/2):
+      ```
+      monitor session 1 source interface GigabitEthernet0/2
+      ```
+    - [ ] Establecer el puerto de destino (por ejemplo, GigabitEthernet0/3, conectado a la PC de monitoreo):
+      ```
+      monitor session 1 destination interface GigabitEthernet0/3
+      ```
+- [ ] **Guardar la configuración:**
+  - [ ] Ejecutar:
+    ```
+    copy running-config startup-config
+    ```
+- [ ] **Monitorear tráfico:**
+  - [ ] En la tercera computadora, abrir una herramienta de análisis de red (por ejemplo, Wireshark).
+  - [ ] Iniciar la captura en la interfaz correspondiente.
+  - [ ] Mientras se ejecuta el comando `ping` entre PC1 y PC2, observar el tráfico capturado.
 
----
-
-### d. Configurar un puerto del switch en modo mirroring y monitorear el tráfico
-
-- [ ] Conectar una tercera computadora al switch para monitoreo.
-- [ ] Acceder a la configuración del switch (ver procedimiento a).
-- [ ] Identificar los puertos donde están conectadas las computadoras:
-  - [ ] `show interfaces status`
-- [ ] Configurar **port mirroring** (SPAN) en el switch:
-  - [ ] `configure terminal`
-  - [ ] `monitor session 1 source interface <puerto_PC1>`
-  - [ ] `monitor session 1 source interface <puerto_PC2>`
-  - [ ] `monitor session 1 destination interface <puerto_monitor>`
-  - [ ] `exit`
-- [ ] Instalar y ejecutar un software de captura de tráfico en la computadora de monitoreo (ej. **Wireshark**).
-- [ ] Configurar Wireshark para capturar tráfico en la interfaz Ethernet correspondiente.
-- [ ] Iniciar la captura y realizar pruebas de conectividad entre **PC1** y **PC2**.
-- [ ] Verificar que se capturan paquetes en la computadora de monitoreo.
-
----
