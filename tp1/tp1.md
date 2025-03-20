@@ -27,7 +27,8 @@
 
 **Fernando E. Stefanovic Carroza:** [*fernando.stefanovic@mi.unc.edu.ar*](mailto:fernando.stefanovic@mi.unc.edu.ar)  
 **Sofia Viale:** [*sofia.viale@mi.unc.edu.ar*](mailto:sofia.viale@mi.unc.edu.ar)  
-**Francisco J. Vásquez:**: [*javier.vasquez@mi.unc.edu.ar*](mailto:javier.vasquez@mi.unc.edu.ar)
+**Francisco J. Vásquez:**: [*javier.vasquez@mi.unc.edu.ar*](mailto:javier.vasquez@mi.unc.edu.ar)  
+**Tomas G. Daniel:** [*tomas.daniel@mi.unc.edu.ar*](mailto:tomas.daniel@mi.unc.edu.ar)  
 
 \[TODO: Rellenar el resto con sus mails\]
 
@@ -128,3 +129,98 @@ El protocolo opera mediante el envío de datagramas, donde cada paquete es trata
 
 
 A pesar de haber sido un pilar fundamental en la evolución de Internet, las limitaciones de IPv4 en términos de espacio de direcciones, seguridad y eficiencia en la transmisión fueron evidenciandose al punto en el que cada día esta tecnología se acerca a un estado de obsolescencia.
+
+#### IPv6: La Evolución Necesaria
+
+**El Protocolo de Internet versión 6** (IPv6) fue diseñado para superar las limitaciones inherentes a IPv4 y asegurar un crecimiento sostenible de Internet. La característica más destacada de IPv6 es el uso de direcciones de 128 bits, lo que permite un espacio de direcciones irrisoriamente grande, asegurando la escalabilidad del Internet en el futuro. Esta expansión es crucial ante el crecimiento exponencial del Internet de las Cosas (IoT) y el aumento constante de dispositivos conectados.
+
+Además del aumento en la cantidad de direcciones, IPv6 introduce mejoras sustanciales en la eficiencia y seguridad de las comunicaciones. Su estructura de encabezados está optimizada para reducir la carga de procesamiento en los routers, lo que mejora el rendimiento en la transmisión de paquetes. En términos de seguridad, IPv6 incorpora de manera nativa mecanismos como **IPSec**, que garantizan la autenticación y cifrado de los datos, fortaleciendo la protección frente a ataques e interceptaciones.
+
+Otra característica destacada es la capacidad de los dispositivos para autoconfigurarse sin necesidad de un servidor DHCP, mediante un proceso conocido como **Stateless Address Autoconfiguration** (SLAAC), lo que simplifica la administración de redes. Asimismo, IPv6 ofrece una mejor gestión de la calidad de servicio (*QoS*), permitiendo la priorización de ciertos tipos de tráfico, como aquellos sensibles a la latencia, optimizando así el rendimiento de aplicaciones en tiempo real como videoconferencias o transmisión de contenido en vivo.
+
+A pesar de sus ventajas, la adopción de IPv6 ha sido gradual debido a la necesidad de compatibilidad con la infraestructura IPv4 existente. Para facilitar la transición, se han desarrollado mecanismos como **dual stack**, que permite el funcionamiento simultáneo de ambos protocolos en una misma red, y **túneles IPv6 sobre IPv4**, utilizados para garantizar la conectividad entre dispositivos en redes mixtas.
+
+En la Figura 3, se ilustra las diferencias entre datagramas de ambas versiones.
+
+![IPv4 vs IPv6](image-2.png)\
+_Figura 3. Datagrama IPv4 (Izquierda) versus IPv6 (Derecha)._
+### Cómo los Dispositivos Encuentran y Contactan a Otros en la Red
+
+Para que los dispositivos en una red puedan comunicarse, es necesario que sepan cómo dirigirse a su destino. Sin embargo, mientras que la **dirección IP** permite identificar de manera lógica a un dispositivo dentro de una red o a través de múltiples redes, la **dirección MAC** es la que realmente permite la entrega de paquetes en el nivel físico dentro de la misma red local. Debido a esto, es esencial contar con mecanismos que permitan asociar estas dos direcciones de manera eficiente.
+
+En **IPv4**, esta tarea es realizada por el **Address Resolution Protocol** (ARP), mientras que en **IPv6** se emplea el **Neighbor Discovery Protocol** (NDP). Ambos protocolos permiten que un dispositivo pueda encontrar la dirección física correspondiente a una dirección IP antes de enviar paquetes de datos.
+
+#### Direcciones Broadcast vs. Multicast en IPv4
+Las direcciones broadcast permiten enviar mensajes a todos los dispositivos dentro de una red. Por ejemplo, la dirección 255.255.255.255 alcanza toda la red, mientras que 192.168.2.255 solo impacta a los hosts dentro de la subred 192.168.2.0/24. Este mecanismo es común en protocolos como ARP y DHCP, donde un dispositivo necesita comunicarse con todos los demás para obtener información. Sin embargo, puede generar tráfico innecesario al involucrar equipos que no requieren el mensaje.
+
+Por otro lado, multicast dirige el tráfico solo a un grupo de dispositivos interesados, sin afectar al resto. Funciona dentro del rango de direcciones 224.0.0.0 a 239.255.255.255 y se usa en aplicaciones como streaming de video o protocolos de enrutamiento, optimizando el ancho de banda al evitar envíos masivos innecesarios. Mientras el broadcast impacta a toda la red, el multicast es más eficiente al limitar la difusión solo a quienes lo necesitan.
+
+#### ARP en IPv4: Traducción de Direcciones para la Comunicación Local
+
+En redes basadas en **IPv4**, ARP es el protocolo encargado de encontrar la dirección MAC asociada a una dirección IP dentro de la misma red local (véase la Figura 4). Cuando un dispositivo necesita enviar un paquete, pero desconoce la dirección MAC del destino, realiza una consulta mediante un **mensaje ARP broadcast**, que es recibido por todos los dispositivos en la red.
+
+El dispositivo cuya dirección IP coincide con la consulta responde enviando un **mensaje ARP unicast**, proporcionando su dirección MAC al emisor. Para optimizar futuras comunicaciones, esta información se almacena en la **tabla ARP** del dispositivo solicitante, evitando la necesidad de repetir el proceso con cada nuevo paquete enviado.
+
+Durante simulaciones en **Packet Tracer**, es posible observar este proceso al analizar el tráfico **ICMP** entre dispositivos. Por ejemplo, al ejecutar un **ping** entre dos clientes, el primer dispositivo enviará una solicitud ARP antes de poder comunicarse, asegurando que los paquetes ICMP sean entregados correctamente al destino.
+
+![Formato ARP](image-3.png)\
+_Figura 4. Formato del Paquete ARP._
+
+#### Tipos de Direcciones IPv6 y su Uso
+IPv6 introduce distintos tipos de direcciones, cada una con un propósito específico:
+
+- Direcciones Link-Local: Se asignan automáticamente a cada interfaz y solo son válidas en el segmento de red local (ejemplo: fe80::1). Se usan para descubrimiento de vecinos y configuración automática.
+
+- Direcciones Unique-Local: Similar a las direcciones privadas en IPv4 (192.168.x.x), utilizadas para redes internas sin necesidad de acceso a Internet (ejemplo: fd00::/8).
+
+- Direcciones Global Unicast: Son únicas en todo Internet y se utilizan para la comunicación global. Se obtienen a través de un proveedor de servicios o asignadas por una autoridad de direcciones IP (ejemplo: 2001:db8::1).
+
+Cada tipo de dirección tiene un caso de uso específico: Link-Local para comunicación interna en la red, Unique-Local para redes privadas y Global Unicast para comunicación externa en Internet.
+
+#### Multicast en IPv6 y Eliminación del Broadcast
+
+IPv6 elimina completamente el concepto de broadcast y en su lugar utiliza multicast para la comunicación con múltiples dispositivos de manera eficiente. Algunas direcciones multicast destacadas en IPv6 incluyen:
+
+FF02::1: Todos los nodos en la red local.
+
+FF02::2: Todos los routers en la red local.
+
+FF02::1:FFXX:XXXX: Dirección especial utilizada en mensajes de Neighbor Solicitation.
+
+
+#### NDP en IPv6: Más que una Simple Resolución de Direcciones
+
+A diferencia de IPv4, IPv6 no utiliza ARP, sino que emplea el Neighbor Discovery Protocol (NDP), un mecanismo más eficiente que no solo resuelve direcciones IP a MAC, sino que también cumple otras funciones esenciales dentro de la administración de la red.
+
+NDP opera mediante mensajes ICMPv6, eliminando la necesidad de broadcast y reemplazándolo por mensajes multicast dirigidos, lo que reduce la congestión en la red y mejora la escalabilidad. A través de estos mensajes, los dispositivos no solo pueden obtener la dirección MAC de un vecino, sino también detectar su disponibilidad y verificar si ha cambiado de dirección. Además, los routers pueden anunciar su presencia y proporcionar información para que los dispositivos configuren automáticamente sus direcciones sin necesidad de un servidor DHCP.
+
+Los tipos de mensajes NDP incluyen:
+
+- Neighbor Solicitation (NS): Utilizado para solicitar la dirección MAC de una dirección IPv6 específica.
+
+- Neighbor Advertisement (NA): Responde a un NS con la dirección MAC del dispositivo.
+
+- Router Solicitation (RS): Un host lo envía para descubrir routers disponibles en la red.
+
+- Router Advertisement (RA): Un router anuncia su presencia y proporciona información de configuración de red.
+
+- Redirect: Permite a los routers indicar mejores rutas a los hosts.
+
+
+### Control y Diagnóstico de Redes: Uso de ICMP
+
+Para garantizar el correcto funcionamiento de las redes, el **Protocolo de Control de Mensajes de Internet (ICMP)** permite la detección de errores y la prueba de conectividad entre dispositivos. Herramientas como **ping** y **traceroute** utilizan ICMP para diagnosticar problemas, evaluar tiempos de respuesta y detectar pérdida de paquetes.
+
+Además, herramientas avanzadas como **Wireshark** permiten capturar tráfico ICMP en tiempo real, facilitando la identificación de errores y la optimización del rendimiento de la red. La combinación de ICMP con herramientas de monitoreo es clave para la administración eficiente de redes modernas.
+
+### Emulación y Simulación de Entornos de Red
+
+Los simuladores y emuladores son herramientas fundamentales para el análisis y prueba de infraestructuras de red. Aunque comparten ciertos objetivos, difieren en su metodología y aplicación.
+
+Un **simulador de redes** modela el comportamiento de una red a través de cálculos matemáticos y representaciones lógicas, permitiendo evaluar protocolos, analizar el rendimiento en distintos escenarios y estudiar su comportamiento sin necesidad de hardware físico. Se emplea principalmente en investigación y desarrollo, ya que posibilita pruebas a gran escala con menor costo y mayor flexibilidad. Sin embargo, opera en tiempo no real, lo que permite un análisis más detallado de eventos específicos. Entre los más utilizados destacan **NS-3**, aplicado en estudios de redes móviles y protocolos de comunicación; **OMNeT++**, empleado en simulaciones de redes inalámbricas y sistemas distribuidos; y **QualNet**, diseñado para evaluar redes de gran escala.
+
+En contraste, un **emulador de redes** replica en tiempo real el comportamiento de una red real, procesando tráfico auténtico e interactuando con dispositivos físicos. Esta capacidad lo hace ideal para pruebas de configuración, formación en redes y validación de infraestructuras antes de su implementación. Su uso es frecuente en la industria y la capacitación profesional, especialmente en certificaciones. Ejemplos destacados incluyen **GNS3**, que emula routers y switches de diversas marcas; **EVE-NG**, con una interfaz avanzada para laboratorios virtuales; y **Mininet**, utilizado en la simulación de redes definidas por software (SDN).
+
+La diferencia esencial entre ambas herramientas radica en su propósito y nivel de interacción con el hardware. Mientras los **simuladores** permiten evaluar redes en escenarios hipotéticos sin requerir dispositivos físicos, los **emuladores** reproducen entornos en tiempo real, facilitando pruebas prácticas con configuraciones reales. Así, los primeros resultan idóneos para la investigación y el diseño de nuevos protocolos, mientras que los segundos se orientan al desarrollo, capacitación y validación de configuraciones en condiciones operativas.
+
+En el desarrollo de esta experiencia, se utilizará el simulador **Packet Tracer** desarrollado por Cisco.
