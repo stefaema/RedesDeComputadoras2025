@@ -154,3 +154,4 @@
   - [ ] Iniciar la captura en la interfaz correspondiente.
   - [ ] Mientras se ejecuta el comando `ping` entre PC1 y PC2, observar el tráfico capturado.
 
+## Capturas del Procedimiento
