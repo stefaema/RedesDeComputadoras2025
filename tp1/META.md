@@ -1,0 +1,4 @@
+En el presente markdown se expresa como debe ser leído e interpretado el trabajo práctico N°1.
+- Decidimos redactar la parte 1 de manera "Narrada", sin incluir estrucutras que hagan explícita la dinámica pregunta-respuesta. Como resultado, el orden de los ejercicios y sub-ejercicios ha sido reorganizado para lograr una mayor sinergia con respecto a los contenidos.
+(Por ejemplo, en los ejercicios 6 y 7 se observa que las preguntas más teóricas y que rompían con el flujo de la actividad fueron trasladadas al marco teórico)
+- La parte del anexo (a.k.a resolución de la Parte II) unifica el ejercicio de checklist con el ejercicio de replicación de la actividad 6 de la parte anterior. De esta forma, se aprecia el procedimiento que hemos hecho de manera ordenada y visual, gracias a la integración de Figuras y comentarios.

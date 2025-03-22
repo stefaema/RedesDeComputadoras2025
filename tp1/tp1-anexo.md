@@ -74,10 +74,12 @@
     ```
 
 ### b. Acceder a las opciones de administración del switch y modificar claves de acceso
+  > *Para esta parte de la experiencia y la configuración en general, se utilizó el host PC 4, perteneciente a uno de los integrantes de Los Peladitos, aunque fue hecha de manera inter-grupal entre Los Peladitos, NoLoSonIEEE y Taylor Switch.*
 
 - [x] **Acceder al switch:**
   
-  ***Para esta parte de la experiencia se utilizó el host perteneciente a uno de los integrantes de Los Peladitos, aunque fue hecha de manera inter-grupal entre Los Peladitos, NoLoSonIEEE y Taylor Switch.***
+
+
   - [x] Conectar la PC al switch (vía consola o mediante conexión Ethernet a la IP de administración).
   - [x] Iniciar sesión usando PuTTY (o navegador si es vía web).
 - [x] **Ingresar al modo privilegiado y de configuración:**
@@ -117,7 +119,7 @@
     *Figura a1. Demostración de los puertos del Switch Up & Running desde PC 4 (PC de Configuración).*
  
 - [x] **Configurar direcciones IP en cada computadora:**
-  - [x] En PC1, es decir la perteneciente al grupo nuesto (NoLoSonIEEE), asignar una IP estática (192.168.1.10/24).
+  - [x] En PC1, es decir la perteneciente al grupo nuestro (NoLoSonIEEE), asignar una IP estática (192.168.1.10/24).
   - [x] En PC2 (correspondiente al grupo de Taylor Switch), asignar una IP estática (192.168.1.15/24).\
   Ambas mediante el código:
   ```
@@ -137,6 +139,10 @@
 - [x] **Conexión física:**
   - [x] Conectar la tercera computadora al switch usando un cable Ethernet.
 - [x] **Configurar port mirroring en el switch: (Figura a2)**
+  
+    ![Configuración de Mirroring](image-29.png)\
+  *Figura a2. Configuración de Mirroring desde PC 4 (PC de Configuración).*
+
   - [x] Acceder al modo de configuración:
     ```
     configure terminal
@@ -151,8 +157,7 @@
       monitor session 1 destination interface GigabitEthernet0/3
       ```
   
-  ![Configuración de Mirroring](image-29.png)\
-  *Figura a2. Configuración de Mirroring desde PC 4 (PC de Configuración).*
+
 - [x] **Guardar la configuración:**
   - [x] Ejecutar:
     ```
@@ -172,7 +177,7 @@
 
 
 - [x] **Monitorear tráfico UDP:**
-  - [x] Entre PC1 y PC2 se envía mediante un script de python (Recepción visualizada en la Figura a5) el payload "Hola mundo desde NoLoSonIEEE para Taylor Switch. Escucha Los Peladitos"(en formato binario).
+  - [x] Entre PC1 y PC2 se envía, mediante un script de python, el payload "Hola mundo desde NoLoSonIEEE para Taylor Switch. Escucha Los Peladitos" $^1$ (en formato binario; Recepción visualizada en la Figura a5).
 
     
     ```
@@ -214,4 +219,9 @@
 
   ![Intercepción del tráfico UDP enviado desde NoLoSonIEEE hacia Taylor Switch](image-27.png)\
   *Figura a6. Intercepción del tráfico UDP desde PC 3 con el mensaje "Hola Mundo, desde NoLoSonIEEE, para Taylor Switch. Escucha Los Peladitos." (Se aprecia a la derecha)*
-## Capturas del Procedimiento
+
+## Observaciones
+- $^1$ En el medio del procedimiento se generó una fe de erratas con respecto a la capitalización de la letra a en el nombre del grupo "Taylor Switch". Esto fue corregido en instancias dispares a las capturas, de ahí la discrepancia tipográfica de esta letra entre el mensaje obtenido (Figura a5) y el mensaje interceptado (Figura a6).
+- El procedimiento se repitió parcialmente bajo la dinámica "envía NoLoSonIEEE, recibe Los Peladitos, escucha Taylor Switch". Sin embargo, el tiempo se acabo antes de poder culminar con la tarea repetida. De todas maneras, la Figura a7 ilustra el evento de recepción.
+![Envío alternativo UDP](image-31.png)\
+*Figura a7. Envío alternativo del mensaje UDP, desde NoLoSonIEEE hacia Los Peladitos (Grupo que en la experiencia anterior escuchó en el puerto de mirroring), usando la dirección IP de recepción 192.168.1.11*
