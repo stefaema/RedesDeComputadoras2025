@@ -74,7 +74,7 @@
     ```
 
 ### b. Acceder a las opciones de administración del switch y modificar claves de acceso
-  > *Para esta parte de la experiencia y la configuración en general, se utilizó el host PC 4, perteneciente a uno de los integrantes de Los Peladitos, aunque fue hecha de manera inter-grupal entre Los Peladitos, NoLoSonIEEE y Taylor Switch.*
+  > *Para esta parte de la experiencia y la configuración en general, se utilizó una cuarta PC, perteneciente a uno de los integrantes de Los Peladitos, aunque fue hecha de manera inter-grupal entre Los Peladitos, NoLoSonIEEE y Taylor Switch.*
 
 - [x] **Acceder al switch:**
   
@@ -92,6 +92,8 @@
     configure terminal
     ```
 - [x] **Modificar claves de acceso:**
+  > Una vez concluída la actividad, la contraseña fue reestablecida a la original ilustrada en el rótulo del dispositivo conmutador.
+
   - [x] Cambiar la contraseña del modo privilegiado:
     ```
     enable secret [nueva_contraseña]
@@ -119,9 +121,10 @@
     *Figura a1. Demostración de los puertos del Switch Up & Running desde PC 4 (PC de Configuración).*
  
 - [x] **Configurar direcciones IP en cada computadora:**
-  - [x] En PC1, es decir la perteneciente al grupo nuestro (NoLoSonIEEE), asignar una IP estática (192.168.1.10/24).
+  - [x] En PC1 (es decir la perteneciente al grupo nuestro, NoLoSonIEEE), asignar la IP estática (192.168.1.10/24).
   - [x] En PC2 (correspondiente al grupo de Taylor Switch), asignar una IP estática (192.168.1.15/24).\
-  Ambas mediante el código:
+  
+  Ambos ítems fueron realizados mediante los comandos:
   ```
   sudo ip addr add 192.168.1.10/24 dev eno1
   ```
@@ -131,17 +134,20 @@
 - [x] **Testear conectividad:**
   - [x] En PC1, abrir la terminal y ejecutar:
     ```
-    ping 192.168.1.11
+    ping 192.168.1.15
     ```
-  - [x] Verificar que se reciben respuestas de PC2.
+  - [x] Verificar que se reciben respuestas de PC2 (Figura a2).
+- 
+    ![Ping NoLoSonIEEE -> TaylorSwitch](image-25.png)\
+  *Figura a2. Ping exitoso realizado desde PC1 (NoLoSonIEEE) a PC2 (TaylorSwitch).* 
 
 ### d. Configurar un puerto del switch en modo mirroring y monitorear, con una tercera computadora, el tráfico entre las dos computadoras conectadas en el procedimiento c.
 - [x] **Conexión física:**
   - [x] Conectar la tercera computadora al switch usando un cable Ethernet.
-- [x] **Configurar port mirroring en el switch: (Figura a2)**
+- [x] **Configurar port mirroring en el switch: (Figura a3)**
   
     ![Configuración de Mirroring](image-29.png)\
-  *Figura a2. Configuración de Mirroring desde PC 4 (PC de Configuración).*
+  *Figura a3. Configuración de Mirroring desde PC 4 (PC de Configuración).*
 
   - [x] Acceder al modo de configuración:
     ```
@@ -166,17 +172,15 @@
 - [x] **Monitorear tráfico ICMP:**
   - [x] En la tercera computadora, abrir una herramienta de análisis de red (En este caso se utilizo Wireshark).
   - [x] Iniciar la captura en la interfaz correspondiente.
-  - [x] Mientras se ejecuta el comando `ping` entre PC1 y PC2 (Figura a3) y viceversa, observar el tráfico capturado (Figura a4).
+  - [x] Mientras se ejecuta el comando `ping` entre PC1 y PC2 (Figura a2) y viceversa, observar el tráfico capturado (Figura a4).
 
-  ![Ping NoLoSonIEEE -> TaylorSwitch](image-25.png)\
-  *Figura a3. Ping exitoso realizado desde PC1 (NoLoSonIEEE) a PC2 (TaylorSwitch).* 
   
   ![Ping Taylor Switch -> NoLoSonIEEE, intercepción por Los Peladitos](image-26.png)\
   *Figura a4. Ping exitoso siendo realizado desde PC2 (TaylorSwitch) hacia PC1 (NoLoSonIEEE). Interceptado mediante Wireshark por PC3 (Los Peladitos).*
 
 
 
-- [x] **Monitorear tráfico UDP:**
+- [x] **Monitorear tráfico de un paquete UDP personalizado:**
   - [x] Entre PC1 y PC2 se envía, mediante un script de python, el payload "Hola mundo desde NoLoSonIEEE para Taylor Switch. Escucha Los Peladitos" $^1$ (en formato binario; Recepción visualizada en la Figura a5).
 
     
@@ -221,7 +225,7 @@
   *Figura a6. Intercepción del tráfico UDP desde PC 3 con el mensaje "Hola Mundo, desde NoLoSonIEEE, para Taylor Switch. Escucha Los Peladitos." (Se aprecia a la derecha)*
 
 ## Observaciones
-- $^1$ En el medio del procedimiento se generó una fe de erratas con respecto a la capitalización de la letra a en el nombre del grupo "Taylor Switch". Esto fue corregido en instancias dispares a las capturas, de ahí la discrepancia tipográfica de esta letra entre el mensaje obtenido (Figura a5) y el mensaje interceptado (Figura a6).
+- $^1$ En el medio del procedimiento se generó una fe de erratas con respecto a la capitalización de la letra *a* en el nombre del grupo "Taylor Switch". Esto fue corregido en instancias dispares a las capturas, de ahí la discrepancia tipográfica de esta letra entre el mensaje obtenido (Figura a5) y el mensaje interceptado (Figura a6).
 - El procedimiento se repitió parcialmente bajo la dinámica "envía NoLoSonIEEE, recibe Los Peladitos, escucha Taylor Switch". Sin embargo, el tiempo se acabo antes de poder culminar con la tarea repetida. De todas maneras, la Figura a7 ilustra el evento de recepción.
 ![Envío alternativo UDP](image-31.png)\
-*Figura a7. Envío alternativo del mensaje UDP, desde NoLoSonIEEE hacia Los Peladitos (Grupo que en la experiencia anterior escuchó en el puerto de mirroring), usando la dirección IP de recepción 192.168.1.11*
+*Figura a7. Envío alternativo del mensaje UDP, desde NoLoSonIEEE hacia Los Peladitos (Grupo que en la experiencia anterior escuchó en el puerto de mirroring), usando la dirección IP de recepción 192.168.1.11/24*
