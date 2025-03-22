@@ -50,108 +50,168 @@
 - **Temperatura de operación:** 0°C a 45°C.
 - **Consumo:** Entre **30W y 45W** según el modelo.
 
----
 
-## Procedimientos para Configuración y Administración de la Red
+## Procedimientos realizados para la Configuración y Administración de la Red
 
 ### a. Conectar una PC al puerto de consola del switch Cisco a 9600 baudios utilizando PuTTY
-- [ ] **Preparar conexión física:**
-  - [ ] Conectar el cable de consola (RJ-45 a DB-9 o USB a RJ-45) entre la PC y el switch.
-  - [ ] Verificar el puerto COM asignado en la PC (p. ej., usando el Administrador de Dispositivos).
-- [ ] **Configurar y abrir PuTTY:**
-  - [ ] Ejecutar PuTTY.
-  - [ ] Seleccionar el modo **Serial**.
-  - [ ] Ingresar los parámetros:
+- [x] **Preparar conexión física:**
+  - [x] Conectar el cable de consola (RJ-45 a DB-9 o USB a RJ-45) entre la PC y el switch.
+  - [x] Verificar el puerto COM asignado en la PC (p. ej., usando el Administrador de Dispositivos).
+- [x] **Configurar y abrir PuTTY:**
+  - [x] Ejecutar PuTTY.
+  - [x] Seleccionar el modo **Serial**.
+  - [x] Ingresar los parámetros:
     - **Puerto COM:** (ejemplo: COM3)
     - **Baud rate:** 9600
     - **Data bits:** 8
     - **Parity:** Ninguna
     - **Stop bits:** 1
     - **Flow control:** Ninguno
-  - [ ] (Opcional) Iniciar PuTTY desde la línea de comandos:
+  - [ ] (Opcional) Iniciar PuTTY desde la línea de comandos\
+    ***Fue realizado mediante la GUI***
     ```
     putty.exe -serial COM3 -sercfg 9600,8,n,1,N
     ```
 
 ### b. Acceder a las opciones de administración del switch y modificar claves de acceso
-- [ ] **Acceder al switch:**
-  - [ ] Conectar la PC al switch (vía consola o mediante conexión Ethernet a la IP de administración).
-  - [ ] Iniciar sesión usando PuTTY (o navegador si es vía web).
-- [ ] **Ingresar al modo privilegiado y de configuración:**
-  - [ ] Ingresar el comando para modo privilegiado:
+
+- [x] **Acceder al switch:**
+  
+  ***Para esta parte de la experiencia se utilizó el host perteneciente a uno de los integrantes de Los Peladitos, aunque fue hecha de manera inter-grupal entre Los Peladitos, NoLoSonIEEE y Taylor Switch.***
+  - [x] Conectar la PC al switch (vía consola o mediante conexión Ethernet a la IP de administración).
+  - [x] Iniciar sesión usando PuTTY (o navegador si es vía web).
+- [x] **Ingresar al modo privilegiado y de configuración:**
+  - [x] Ingresar el comando para modo privilegiado:
     ```
     enable
     ```
-  - [ ] Entrar al modo de configuración global:
+  - [x] Entrar al modo de configuración global:
     ```
     configure terminal
     ```
-- [ ] **Modificar claves de acceso:**
-  - [ ] Cambiar la contraseña del modo privilegiado:
+- [x] **Modificar claves de acceso:**
+  - [x] Cambiar la contraseña del modo privilegiado:
     ```
     enable secret [nueva_contraseña]
     ```
-  - [ ] (Opcional) Configurar contraseñas para acceso remoto (línea VTY):
+  - [ ] (Opcional) Configurar contraseñas para acceso remoto (línea VTY):  
+      **Omisión debido al hecho de que utilizamos la Consola mediante el conector Rs 232.**
     ```
     line vty 0 15
     password [nueva_contraseña_vty]
     login
     exit
     ```
-- [ ] **Guardar la configuración:**
-  - [ ] Ejecutar:
+- [x] **Guardar la configuración:**
+  - [x] Ejecutar:
     ```
     copy running-config startup-config
     ```
 
 ### c. Conectar dos computadoras al switch, configurar una red y testear conectividad
-- [ ] **Conexión física:**
-  - [ ] Conectar cada computadora a un puerto del switch usando cables Ethernet.
-  - [ ] Verificar que las luces de enlace en los puertos estén activas.
-- [ ] **Configurar direcciones IP en cada computadora:**
-  - [ ] En PC1, asignar una IP estática (ejemplo: 192.168.1.10/24) o configurar DHCP.
-  - [ ] En PC2, asignar una IP estática (ejemplo: 192.168.1.11/24) o configurar DHCP.
-  - [ ] (Opcional) Revisar la configuración actual:
-    - En Windows:
-      ```
-      ipconfig /all
-      ```
-    - En Linux/Mac:
-      ```
-      ifconfig
-      ```
-- [ ] **Testear conectividad:**
-  - [ ] En PC1, abrir la terminal y ejecutar:
+- [x] **Conexión física:**
+  - [x] Conectar cada computadora a un puerto del switch usando cables Ethernet (Verificado mediante la Figura a1).
+   - [x] Verificar que las luces de enlace en los puertos estén activas.
+  
+    ![Demostración de los puertos del Switch Up & Running](image-28.png)\
+    *Figura a1. Demostración de los puertos del Switch Up & Running desde PC 4 (PC de Configuración).*
+ 
+- [x] **Configurar direcciones IP en cada computadora:**
+  - [x] En PC1, es decir la perteneciente al grupo nuesto (NoLoSonIEEE), asignar una IP estática (192.168.1.10/24).
+  - [x] En PC2 (correspondiente al grupo de Taylor Switch), asignar una IP estática (192.168.1.15/24).\
+  Ambas mediante el código:
+  ```
+  sudo ip addr add 192.168.1.10/24 dev eno1
+  ```
+  ```
+  sudo ip addr add 192.168.1.15/24 dev eno1
+  ```
+- [x] **Testear conectividad:**
+  - [x] En PC1, abrir la terminal y ejecutar:
     ```
     ping 192.168.1.11
     ```
-  - [ ] Verificar que se reciben respuestas de PC2.
+  - [x] Verificar que se reciben respuestas de PC2.
 
 ### d. Configurar un puerto del switch en modo mirroring y monitorear, con una tercera computadora, el tráfico entre las dos computadoras conectadas en el procedimiento c.
-- [ ] **Conexión física:**
-  - [ ] Conectar la tercera computadora al switch usando un cable Ethernet.
-- [ ] **Configurar port mirroring en el switch:**
-  - [ ] Acceder al modo de configuración:
+- [x] **Conexión física:**
+  - [x] Conectar la tercera computadora al switch usando un cable Ethernet.
+- [x] **Configurar port mirroring en el switch: (Figura a2)**
+  - [x] Acceder al modo de configuración:
     ```
     configure terminal
     ```
-  - [ ] Configurar la sesión de monitorización (ejemplo: sesión 1):
-    - [ ] Establecer el puerto fuente (por ejemplo, GigabitEthernet0/2):
+  - [x] Configurar la sesión de monitorización (ejemplo: sesión 1):
+    - [x] Establecer el puerto fuente (GigabitEthernet0/2):
       ```
       monitor session 1 source interface GigabitEthernet0/2
       ```
-    - [ ] Establecer el puerto de destino (por ejemplo, GigabitEthernet0/3, conectado a la PC de monitoreo):
+    - [x] Establecer el puerto de destino (GigabitEthernet0/3, conectado a la PC de monitoreo):
       ```
       monitor session 1 destination interface GigabitEthernet0/3
       ```
-- [ ] **Guardar la configuración:**
-  - [ ] Ejecutar:
+  
+  ![Configuración de Mirroring](image-29.png)\
+  *Figura a2. Configuración de Mirroring desde PC 4 (PC de Configuración).*
+- [x] **Guardar la configuración:**
+  - [x] Ejecutar:
     ```
     copy running-config startup-config
     ```
-- [ ] **Monitorear tráfico:**
-  - [ ] En la tercera computadora, abrir una herramienta de análisis de red (por ejemplo, Wireshark).
-  - [ ] Iniciar la captura en la interfaz correspondiente.
-  - [ ] Mientras se ejecuta el comando `ping` entre PC1 y PC2, observar el tráfico capturado.
+- [x] **Monitorear tráfico ICMP:**
+  - [x] En la tercera computadora, abrir una herramienta de análisis de red (En este caso se utilizo Wireshark).
+  - [x] Iniciar la captura en la interfaz correspondiente.
+  - [x] Mientras se ejecuta el comando `ping` entre PC1 y PC2 (Figura a3) y viceversa, observar el tráfico capturado (Figura a4).
 
+  ![Ping NoLoSonIEEE -> TaylorSwitch](image-25.png)\
+  *Figura a3. Ping exitoso realizado desde PC1 (NoLoSonIEEE) a PC2 (TaylorSwitch).* 
+  
+  ![Ping Taylor Switch -> NoLoSonIEEE, intercepción por Los Peladitos](image-26.png)\
+  *Figura a4. Ping exitoso siendo realizado desde PC2 (TaylorSwitch) hacia PC1 (NoLoSonIEEE). Interceptado mediante Wireshark por PC3 (Los Peladitos).*
+
+
+
+- [x] **Monitorear tráfico UDP:**
+  - [x] Entre PC1 y PC2 se envía mediante un script de python (Recepción visualizada en la Figura a5) el payload "Hola mundo desde NoLoSonIEEE para Taylor Switch. Escucha Los Peladitos"(en formato binario).
+
+    
+    ```
+    # Código de Emisión
+    import socket
+
+    ip_destino = '192.168.1.15'
+    puerto = 5005
+
+    mensaje = b'Hola Mundo, desde NoLoSonIEEE, para Taylor Switch. Escucha Los Peladitos.'
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.sendto(mensaje, (ip_destino, puerto))
+    sock.close()
+
+    ```
+
+    ```
+    # Código de Recepción
+    import socket
+
+    # Configurar socket UDP
+    ip_local = "192.168.1.10"  
+    puerto = 5005         
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind((ip_local, puerto))
+
+    print(f"Esperando mensaje del puerto {puerto}...")
+
+    while True:
+        data, addr = sock.recvfrom(1024)  # Recibir hasta 1024 bytes
+        print(f"Mensaje recibido de {addr}: {data.decode()}")
+    ```
+    ![Recpeción del tráfico UDP por Taylor Switch, enviado por NoLoSonIEEE](image-30.png)\
+  *Figura a5. Recpeción del tráfico UDP por Taylor Switch, enviado por NoLoSonIEEE.*
+  - [x] Debido al Mirroring, Los Peladitos escucharán el mensaje y serán capaces de interceptar el payload (Ver Figura a6).
+  
+
+  ![Intercepción del tráfico UDP enviado desde NoLoSonIEEE hacia Taylor Switch](image-27.png)\
+  *Figura a6. Intercepción del tráfico UDP desde PC 3 con el mensaje "Hola Mundo, desde NoLoSonIEEE, para Taylor Switch. Escucha Los Peladitos." (Se aprecia a la derecha)*
 ## Capturas del Procedimiento
