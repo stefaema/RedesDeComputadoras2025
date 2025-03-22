@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Anexo TP1&colon; Implementaci&oacute;n F&iacute;sica de la Red Propuesta</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="anexo-tp1-implementación-física-de-la-red-propuesta">Anexo TP1: Implementación Física de la Red Propuesta</h1>
+<h2 id="resumen-de-características---cisco-catalyst-2950-series">Resumen de Características - Cisco Catalyst 2950 Series</h2>
+<h3 id="1-concepto-general">1. Concepto General</h3>
+<ul>
+<li><strong>Switches fijos y gestionados de capa 2:</strong> Conmutación 10/100 Mbps con uplinks Gigabit.</li>
+<li><strong>Cisco IOS Standard Image (SI):</strong> Funcionalidades básicas de datos, voz y video.</li>
+<li><strong>Administración web integrada:</strong> Cisco Device Manager y Cisco Network Assistant.</li>
+</ul>
+<h3 id="2-modelos-principales">2. Modelos Principales</h3>
+<table>
+<thead>
+<tr>
+<th>Modelo</th>
+<th>Puertos Fast Ethernet</th>
+<th>Uplinks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cisco Catalyst 2950SX-48</strong></td>
+<td>48 × 10/100 Mbps</td>
+<td>2 × 1000BASE-SX (fibra)</td>
+</tr>
+<tr>
+<td><strong>Cisco Catalyst 2950T-48</strong></td>
+<td>48 × 10/100 Mbps</td>
+<td>2 × 10/100/1000BASE-T (cobre)</td>
+</tr>
+<tr>
+<td><strong>Cisco Catalyst 2950SX-24</strong></td>
+<td>24 × 10/100 Mbps</td>
+<td>2 × 1000BASE-SX (fibra)</td>
+</tr>
+<tr>
+<td><strong>Cisco Catalyst 2950-24</strong></td>
+<td>24 × 10/100 Mbps</td>
+<td>No</td>
+</tr>
+<tr>
+<td><strong>Cisco Catalyst 2950-12</strong></td>
+<td>12 × 10/100 Mbps</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h3 id="3-rendimiento-y-disponibilidad">3. Rendimiento y Disponibilidad</h3>
+<ul>
+<li><strong>Ancho de banda de conmutación:</strong> Hasta <strong>13.6 Gbps</strong>.</li>
+<li><strong>Wire-speed switching</strong> en todos los puertos.</li>
+<li><strong>Spanning Tree Protocol (STP, RSTP, MSTP, PVST+):</strong> Redundancia sin bucles.</li>
+<li><strong>EtherChannel / LACP:</strong> Agregación de enlaces para mayor ancho de banda.</li>
+<li><strong>Soporte de RPS (fuente de alimentación redundante).</strong></li>
+</ul>
+<h3 id="4-funciones-de-seguridad">4. Funciones de Seguridad</h3>
+<ul>
+<li><strong>802.1X (autenticación por puerto).</strong></li>
+<li><strong>Port Security:</strong> Control de acceso por MAC address.</li>
+<li><strong>SSHv2:</strong> Administración segura por CLI.</li>
+<li><strong>TACACS+ / RADIUS:</strong> Integración con servidores de autenticación.</li>
+<li><strong>Private VLAN Edge:</strong> Aislamiento de puertos en el switch.</li>
+<li><strong>SNMPv3 (no criptográfico):</strong> Monitoreo seguro.</li>
+</ul>
+<h3 id="5-calidad-de-servicio-qos">5. Calidad de Servicio (QoS)</h3>
+<ul>
+<li><strong>802.1p (CoS) y clasificación de tráfico por puerto.</strong></li>
+<li><strong>4 colas de prioridad por puerto (Strict Priority / WRR).</strong></li>
+<li><strong>Soporte para priorización de tráfico de voz y video.</strong></li>
+</ul>
+<h3 id="6-administración">6. Administración</h3>
+<ul>
+<li><strong>Cisco Device Manager:</strong> Configuración vía navegador.</li>
+<li><strong>Cisco Express Setup:</strong> Inicio rápido sin CLI.</li>
+<li><strong>Cisco Network Assistant:</strong> Gestión centralizada de múltiples switches.</li>
+<li><strong>SNMP (v1, v2, v3) y RMON:</strong> Monitoreo y estadísticas.</li>
+<li><strong>CiscoWorks:</strong> Gestión avanzada de red.</li>
+</ul>
+<h3 id="7-características-físicas-y-consumo">7. Características Físicas y Consumo</h3>
+<ul>
+<li><strong>Factor de forma:</strong> 1U, rackeable.</li>
+<li><strong>Dimensiones:</strong> De <strong>9.52” a 13” de profundidad</strong> (según modelo).</li>
+<li><strong>Peso:</strong> Entre <strong>6.5 lb y 10.5 lb</strong>.</li>
+<li><strong>Temperatura de operación:</strong> 0°C a 45°C.</li>
+<li><strong>Consumo:</strong> Entre <strong>30W y 45W</strong> según el modelo.</li>
+</ul>
+<h2 id="procedimientos-realizados-para-la-configuración-y-administración-de-la-red">Procedimientos realizados para la Configuración y Administración de la Red</h2>
+<h3 id="a-conectar-una-pc-al-puerto-de-consola-del-switch-cisco-a-9600-baudios-utilizando-putty">a. Conectar una PC al puerto de consola del switch Cisco a 9600 baudios utilizando PuTTY</h3>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> <strong>Preparar conexión física:</strong>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Conectar el cable de consola (RJ-45 a DB-9 o USB a RJ-45) entre la PC y el switch.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Verificar el puerto COM asignado en la PC (p. ej., usando el Administrador de Dispositivos).</li>
+</ul>
+</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> <strong>Configurar y abrir PuTTY:</strong>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Ejecutar PuTTY.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Seleccionar el modo <strong>Serial</strong>.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Ingresar los parámetros:
+<ul>
+<li><strong>Puerto COM:</strong> (ejemplo: COM3)</li>
+<li><strong>Baud rate:</strong> 9600</li>
+<li><strong>Data bits:</strong> 8</li>
+<li><strong>Parity:</strong> Ninguna</li>
+<li><strong>Stop bits:</strong> 1</li>
+<li><strong>Flow control:</strong> Ninguno</li>
+</ul>
+</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> (Opcional) Iniciar PuTTY desde la línea de comandos<br>
+<em><strong>Fue realizado mediante la GUI</strong></em><pre><code>putty.exe -serial COM3 -sercfg 9600,8,n,1,N
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="b-acceder-a-las-opciones-de-administración-del-switch-y-modificar-claves-de-acceso">b. Acceder a las opciones de administración del switch y modificar claves de acceso</h3>
+<blockquote>
+<p><em>Para esta parte de la experiencia y la configuración en general, se utilizó una cuarta PC, perteneciente a uno de los integrantes de Los Peladitos, aunque fue hecha de manera inter-grupal entre Los Peladitos, NoLoSonIEEE y Taylor Switch.</em></p>
+</blockquote>
+<ul class="contains-task-list">
+<li class="task-list-item enabled">
+<p><input class="task-list-item-checkbox" checked=""type="checkbox"> <strong>Acceder al switch:</strong></p>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Conectar la PC al switch (vía consola o mediante conexión Ethernet a la IP de administración).</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Iniciar sesión usando PuTTY (o navegador si es vía web).</li>
+</ul>
+</li>
+<li class="task-list-item enabled">
+<p><input class="task-list-item-checkbox" checked=""type="checkbox"> <strong>Ingresar al modo privilegiado y de configuración:</strong></p>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Ingresar el comando para modo privilegiado:<pre><code>enable
+</code></pre>
+</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Entrar al modo de configuración global:<pre><code>configure terminal
+</code></pre>
+</li>
+</ul>
+</li>
+<li class="task-list-item enabled">
+<p><input class="task-list-item-checkbox" checked=""type="checkbox"> <strong>Modificar claves de acceso:</strong></p>
+<blockquote>
+<p>Una vez concluída la actividad, la contraseña fue reestablecida a la original ilustrada en el rótulo del dispositivo conmutador.</p>
+</blockquote>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Cambiar la contraseña del modo privilegiado:<pre><code>enable secret [nueva_contraseña]
+</code></pre>
+</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox"type="checkbox"> (Opcional) Configurar contraseñas para acceso remoto (línea VTY):<br>
+<strong>Omisión debido al hecho de que utilizamos la Consola mediante el conector Rs 232.</strong><pre><code>line vty 0 15
+password [nueva_contraseña_vty]
+login
+exit
+</code></pre>
+</li>
+</ul>
+</li>
+<li class="task-list-item enabled">
+<p><input class="task-list-item-checkbox" checked=""type="checkbox"> <strong>Guardar la configuración:</strong></p>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Ejecutar:<pre><code>copy running-config startup-config
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="c-conectar-dos-computadoras-al-switch-configurar-una-red-y-testear-conectividad">c. Conectar dos computadoras al switch, configurar una red y testear conectividad</h3>
+<ul class="contains-task-list">
+<li class="task-list-item enabled">
+<p><input class="task-list-item-checkbox" checked=""type="checkbox"> <strong>Conexión física:</strong></p>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Conectar cada computadora a un puerto del switch usando cables Ethernet (Verificado mediante la Figura a1).</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Verificar que las luces de enlace en los puertos estén activas.</li>
+</ul>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-28.png" alt="Demostración de los puertos del Switch Up &amp; Running"><br>
+<em>Figura a1. Demostración de los puertos del Switch Up &amp; Running desde PC 4 (PC de Configuración).</em></p>
+</li>
+<li class="task-list-item enabled">
+<p><input class="task-list-item-checkbox" checked=""type="checkbox"> <strong>Configurar direcciones IP en cada computadora:</strong></p>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> En PC1 (es decir la perteneciente al grupo nuestro, NoLoSonIEEE), asignar la IP estática (192.168.1.10/24).</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> En PC2 (correspondiente al grupo de Taylor Switch), asignar una IP estática (192.168.1.15/24).</li>
+</ul>
+<p>Ambos ítems fueron realizados mediante los comandos:</p>
+<pre><code>sudo ip addr add 192.168.1.10/24 dev eno1
+</code></pre>
+<pre><code>sudo ip addr add 192.168.1.15/24 dev eno1
+</code></pre>
+</li>
+<li class="task-list-item enabled">
+<p><input class="task-list-item-checkbox" checked=""type="checkbox"> <strong>Testear conectividad:</strong></p>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> En PC1, abrir la terminal y ejecutar:<pre><code>ping 192.168.1.15
+</code></pre>
+</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Verificar que se reciben respuestas de PC2 (Figura a2).</li>
+</ul>
+</li>
+<li>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-25.png" alt="Ping NoLoSonIEEE -&gt; TaylorSwitch"><br>
+<em>Figura a2. Ping exitoso realizado desde PC1 (NoLoSonIEEE) a PC2 (TaylorSwitch).</em></p>
+</li>
+</ul>
+<h3 id="d-configurar-un-puerto-del-switch-en-modo-mirroring-y-monitorear-con-una-tercera-computadora-el-tráfico-entre-las-dos-computadoras-conectadas-en-el-procedimiento-c">d. Configurar un puerto del switch en modo mirroring y monitorear, con una tercera computadora, el tráfico entre las dos computadoras conectadas en el procedimiento c.</h3>
+<ul class="contains-task-list">
+<li class="task-list-item enabled">
+<p><input class="task-list-item-checkbox" checked=""type="checkbox"> <strong>Conexión física:</strong></p>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Conectar la tercera computadora al switch usando un cable Ethernet.</li>
+</ul>
+</li>
+<li class="task-list-item enabled">
+<p><input class="task-list-item-checkbox" checked=""type="checkbox"> <strong>Configurar port mirroring en el switch: (Figura a3)</strong></p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-29.png" alt="Configuración de Mirroring"><br>
+<em>Figura a3. Configuración de Mirroring desde PC 4 (PC de Configuración).</em></p>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Acceder al modo de configuración:<pre><code>configure terminal
+</code></pre>
+</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Configurar la sesión de monitorización (ejemplo: sesión 1):
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Establecer el puerto fuente (GigabitEthernet0/2):<pre><code>monitor session 1 source interface GigabitEthernet0/2
+</code></pre>
+</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Establecer el puerto de destino (GigabitEthernet0/3, conectado a la PC de monitoreo):<pre><code>monitor session 1 destination interface GigabitEthernet0/3
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="task-list-item enabled">
+<p><input class="task-list-item-checkbox" checked=""type="checkbox"> <strong>Guardar la configuración:</strong></p>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Ejecutar:<pre><code>copy running-config startup-config
+</code></pre>
+</li>
+</ul>
+</li>
+<li class="task-list-item enabled">
+<p><input class="task-list-item-checkbox" checked=""type="checkbox"> <strong>Monitorear tráfico ICMP:</strong></p>
+<ul class="contains-task-list">
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> En la tercera computadora, abrir una herramienta de análisis de red (En este caso se utilizo Wireshark).</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Iniciar la captura en la interfaz correspondiente.</li>
+<li class="task-list-item enabled"><input class="task-list-item-checkbox" checked=""type="checkbox"> Mientras se ejecuta el comando <code>ping</code> entre PC1 y PC2 (Figura a2) y viceversa, observar el tráfico capturado (Figura a4).</li>
+</ul>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-26.png" alt="Ping Taylor Switch -&gt; NoLoSonIEEE, intercepción por Los Peladitos"><br>
+<em>Figura a4. Ping exitoso siendo realizado desde PC2 (TaylorSwitch) hacia PC1 (NoLoSonIEEE). Interceptado mediante Wireshark por PC3 (Los Peladitos).</em></p>
+</li>
+<li class="task-list-item enabled">
+<p><input class="task-list-item-checkbox" checked=""type="checkbox"> <strong>Monitorear tráfico de un paquete UDP personalizado:</strong></p>
+<ul class="contains-task-list">
+<li class="task-list-item enabled">
+<p><input class="task-list-item-checkbox" checked=""type="checkbox"> Entre PC1 y PC2 se envía, mediante un script de python, el payload &quot;Hola mundo desde NoLoSonIEEE para Taylor Switch. Escucha Los Peladitos&quot; <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mrow></mrow><mn>1</mn></msup></mrow><annotation encoding="application/x-tex">^1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span></span></span></span></span></span></span></span> (en formato binario; Recepción visualizada en la Figura a5).</p>
+<pre><code># Código de Emisión
+import socket
+
+ip_destino = '192.168.1.15'
+puerto = 5005
+
+mensaje = b'Hola Mundo, desde NoLoSonIEEE, para Taylor Switch. Escucha Los Peladitos.'
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.sendto(mensaje, (ip_destino, puerto))
+sock.close()
+
+</code></pre>
+<pre><code># Código de Recepción
+import socket
+
+# Configurar socket UDP
+ip_local = &quot;192.168.1.10&quot;  
+puerto = 5005         
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.bind((ip_local, puerto))
+
+print(f&quot;Esperando mensaje del puerto {puerto}...&quot;)
+
+while True:
+    data, addr = sock.recvfrom(1024)  # Recibir hasta 1024 bytes
+    print(f&quot;Mensaje recibido de {addr}: {data.decode()}&quot;)
+</code></pre>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-30.png" alt="Recpeción del tráfico UDP por Taylor Switch, enviado por NoLoSonIEEE"><br>
+<em>Figura a5. Recpeción del tráfico UDP por Taylor Switch, enviado por NoLoSonIEEE.</em></p>
+</li>
+<li class="task-list-item enabled">
+<p><input class="task-list-item-checkbox" checked=""type="checkbox"> Debido al Mirroring, Los Peladitos escucharán el mensaje y serán capaces de interceptar el payload (Ver Figura a6).</p>
+</li>
+</ul>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-27.png" alt="Intercepción del tráfico UDP enviado desde NoLoSonIEEE hacia Taylor Switch"><br>
+<em>Figura a6. Intercepción del tráfico UDP desde PC 3 con el mensaje &quot;Hola Mundo, desde NoLoSonIEEE, para Taylor Switch. Escucha Los Peladitos.&quot; (Se aprecia a la derecha)</em></p>
+</li>
+</ul>
+<h2 id="observaciones">Observaciones</h2>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mrow></mrow><mn>1</mn></msup></mrow><annotation encoding="application/x-tex">^1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8141em;"></span><span class="mord"><span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span></span></span></span></span></span></span></span> En el medio del procedimiento se generó una fe de erratas con respecto a la capitalización de la letra <em>a</em> en el nombre del grupo &quot;Taylor Switch&quot;. Esto fue corregido en instancias dispares entre las capturas (se realizaron dos intentos exitosos con esa diferencia), de ahí la discrepancia tipográfica de esta letra entre el mensaje obtenido (Figura a5) y el mensaje interceptado (Figura a6).</li>
+<li>El procedimiento se repitió parcialmente bajo la dinámica &quot;envía NoLoSonIEEE, recibe Los Peladitos, escucha Taylor Switch&quot;. Sin embargo, el tiempo se acabo antes de poder culminar con la tarea repetida. De todas maneras, la Figura a7 ilustra el evento de recepción.
+<img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-31.png" alt="Envío alternativo UDP"><br>
+<em>Figura a7. Envío alternativo del mensaje UDP, desde NoLoSonIEEE hacia Los Peladitos (Grupo que en la experiencia anterior escuchó en el puerto de mirroring), usando la dirección IP de recepción 192.168.1.11/24</em></li>
+</ul>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>
