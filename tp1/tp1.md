@@ -29,8 +29,7 @@
 **Sofia Viale:** [*sofia.viale@mi.unc.edu.ar*](mailto:sofia.viale@mi.unc.edu.ar)  
 **Francisco J. Vásquez:**: [*javier.vasquez@mi.unc.edu.ar*](mailto:javier.vasquez@mi.unc.edu.ar)  
 **Tomas G. Daniel:** [*tomas.daniel@mi.unc.edu.ar*](mailto:tomas.daniel@mi.unc.edu.ar)  
-
-\[TODO: Rellenar el resto con sus mails\]
+**Sofía Aldana Ávalos** [*aldana.avalos@mi.unc.edu.ar*](mailto:aldana.avalos@mi.unc.ed.ar)
 
 ## Resumen
 En este trabajo se llevó a cabo la configuración y análisis de una red de computadoras con soporte para IPv4 e IPv6. Se implementó un esquema de interconexión utilizando dispositivos de red que permiten la comunicación entre distintas subredes, evaluando la correcta operación del enrutamiento y la resolución de direcciones. Para verificar la integridad de la red, se realizaron pruebas funcionales mediante el uso de comandos ping y herramientas de captura de tráfico, analizando los mensajes ICMP generados. Se inspeccionaron en detalle los protocolos ARP y NDP, observando su rol en la comunicación y comparación en ambos entornos de direccionamiento. Los resultados obtenidos permitieron validar el correcto funcionamiento de la infraestructura de red, asegurando la conectividad entre dispositivos y la efectividad de los protocolos utilizados.
@@ -224,3 +223,104 @@ En contraste, un **emulador de redes** replica en tiempo real el comportamiento 
 La diferencia esencial entre ambas herramientas radica en su propósito y nivel de interacción con el hardware. Mientras los **simuladores** permiten evaluar redes en escenarios hipotéticos sin requerir dispositivos físicos, los **emuladores** reproducen entornos en tiempo real, facilitando pruebas prácticas con configuraciones reales. Así, los primeros resultan idóneos para la investigación y el diseño de nuevos protocolos, mientras que los segundos se orientan al desarrollo, capacitación y validación de configuraciones en condiciones operativas.
 
 En el desarrollo de esta experiencia, se utilizará el simulador **Packet Tracer** desarrollado por Cisco.
+
+## Desarrollo
+
+### Configuración y Arquitectura de la Red
+
+Se ha configurado para esta experiencia una red compuesta por un router, un switch y tres computadoras interconectadas mediante direcciones IPv4 e IPv6, junto con un esquema dual de subredes, tal como se ilustra en la Figura 5.  
+![Esquema Topológico de la Red Propuesta](image-4.png)\
+_Figura 5. Esquema Topológico de la Red Propuesta._
+
+De esta forma, el **Router 1** se configura con dos interfaces de red (Ver Figura 6):
+
+* **eth0**, que conecta con la computadora **h1** en la subred **192.168.1.0/24** y utiliza la dirección **192.168.1.11** con IPv4 y **2001:aaaa:bbbb:1::11/64** con IPv6.  
+* **eth1**, que conecta con un switch y pertenece a la subred **192.168.2.0/24**, con la dirección **192.168.2.12** en IPv4 y **2001:aaaa:cccc:1::12/64** en IPv6.
+
+El **Switch 1** interconecta las computadoras **h2** y **h3**, que pertenecen a la subred **192.168.2.0/24**.
+
+* **h2** tiene la dirección **192.168.2.10/24** en IPv4 y **2001:aaaa:cccc:1::10/64** en IPv6.  
+* **h3** tiene la dirección **192.168.2.11/24** en IPv4 y **2001:aaaa:cccc:1::11/64** en IPv6.
+
+Por último, la interfaz **eth0** del **Router 1** se conecta con la computadora **h1**, teniendo esta última la dirección **192.168.1.10/24** en IPv4 y **2001:aaaa:bbbb:1::10/64** en IPv6.
+
+![Comandos Emitidos para la Configuración del Router](image-5.png)\
+_Figura 6. Comandos Emitidos para la Configuración del Router._
+
+Cabe destacar que para el correcto funcionamiento del direccionamiento versión 6 es necesario para esta versión de Packet Tracer la activación del modo unicast para ipv6, como se indica en la Figura 7.
+
+![Configuración Adicional del Router para IPv6](image-6.png)\
+_Figura 7. Configuración Adicional del Router para IPv6._
+
+### Análisis Cualitativo de la Integridad de la Red
+
+Para esta parte del análisis se intentará emitir el comando ping tanto en un ecosistema de versionado IPv4 como IPv6. De esta forma, se podrá analizar si el sistema funciona o no, con un carácter cualitativo y meramente funcional.
+
+#### Verificación Cualitativa en IPv4: ICMP
+En la Figura 8 se muestra con éxito el envío de ping del host 1 a los demás. En la Figura 9, se observa al host 2 enviando un ping exitoso a los otros dos hosts. Por último, en la Figura 10, se aprecia el mismo caso de éxito para el Host 3.
+
+![Resultado del comando Ping para el Host 1.](image-7.png)\
+_Figura 8. Resultado del comando Ping para el Host 1._
+
+![Resultado del comando Ping para el Host 2.](image-8.png)\
+_Figura 9. Resultado del comando Ping para el Host 2._
+
+![Resultado del comando Ping para el Host 3.](image-9.png)\
+_Figura 10. Resultado del comando Ping para el Host 3._
+
+#### Verificación Cualitativa en IPv6: ICMPv6
+En la figura 11, se muestra que el host 1 logra enviar pings exitosamente a los demás dispositivos. En la figura 12, se observa que el host 2 también consigue comunicarse sin inconvenientes con los otros dos hosts. Finalmente, en la figura 13, se verifica el mismo resultado satisfactorio para el host 3.
+
+![Resultado del comando Ping para el Host 1.](image-10.png)\
+_Figura 11. Resultado del comando Ping para el Host 1._
+
+![Resultado del comando Ping para el Host 2.](image-11.png)\
+_Figura 12. Resultado del comando Ping para el Host 2._
+
+![Resultado del comando Ping para el Host 3.](image-12.png)\
+_Figura 13. Resultado del comando Ping para el Host 3._
+
+### Análisis Cuantitativo de la Integridad de la Red
+
+En este apartado analítico se hará foco sobre el desglose y traducción de los datos y de los mecanismos internos que se manifiestan al realizar el comando ping (más concretamente, el esquema ICMP), por lo que se considerará de carácter cuantitativo y meramente estructural.
+
+#### Verificación Cuantitativa en IPv4: ARP e ICMP
+
+Cuando H1 intenta comunicarse con H2, primero verifica si la dirección MAC de H2 está en su tabla ARP. Como están en diferentes redes, H1 en realidad necesitará la dirección MAC del router (puerta de enlace predeterminada).
+
+El proceso es el siguiente:
+
+1. H1 envía una solicitud ARP, como se aprecia en la Figura 14.
+   
+   ![Solicitud ARP](image-13.png)\
+   _Figura 14. Solicitud ARP de Host 1._
+2. El router responde con su dirección MAC (Es el único dispositivo de la red, por lo que es el único que responde), como se aprecia en la Figura 15.
+   
+   ![Respuesta ARP](image-14.png)\
+    _Figura 15. Respuesta ARP del Router._
+
+3. H1 encapsula el paquete ICMP en una trama Ethernet con la dirección MAC del router como destino.
+4. El router, al recibir el paquete, verifica la dirección IP de destino y reenvía el paquete a H2 si conoce su dirección MAC.
+5. Si el router no tiene la MAC de H2 en su tabla ARP, enviará otra solicitud ARP preguntando por la MAC de H2.
+6. H2 responde con su dirección MAC, y entonces el router envía el paquete ICMP a H2.
+
+Esta comunicación ICMP **entiende el origen y destino mediante la sección del datagrama correspondiente a ambas direcciones IP** (192.168.1.10 para el origen, 192.168.2.10 para el destino), tal como se muestra en la Figura 16.
+
+![PDU del Mensaje ICMP](image-15.png)\
+_Figura 16. PDU del Mensaje ICMP_
+
+Además, esta comunicación entre subredes es posible gracias al concepto de **tabla de enrutamiento**, donde el Router es capaz de discernir que lo mejor es enviar al paquete ICMP desde su interfaz **eth0** hacia su interfaz **eth1**, ya que en esta última se encuentra la **subred 192.168.2.0/24**, la misma que la del dispositivo de destino.
+
+Una vez realizado el proceso, las tablas ARP de cada dispositivo se verá modificada. Si originalmente cada host no analizaba a sus vecinos mediante ARP en modo difusión, entonces la tabla ARP del host no involucrado sería nula. Sin embargo, el simulador Packet Tracer ejecuta solicitudes ARP desde un inicio al ver dispositivos con las tablas vacías, por lo que el resultado final para el Host 3 no es nulo. Para cada tabla ARP se brinda las Figuras 17, 18, 19 y 20 respectivamente para los Host 1, 2, 3 y el Router.
+
+![Tabla ARP de H1](image-16.png)\
+_Figura 17. Tabla ARP de H1._
+
+![Tabla ARP de H2](image-17.png)\
+_Figura 18. Tabla ARP de H2._
+
+![Tabla ARP de H3](image-18.png)\
+_Figura 19. Tabla ARP de H3._
+
+![Tabla ARP del Router](image-19.png)\
+_Figura 20. Tabla ARP del Router._
