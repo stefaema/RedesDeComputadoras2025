@@ -353,6 +353,43 @@
 <em>Figura 19. Tabla ARP de H3.</em></p>
 <p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-19.png" alt="Tabla ARP del Router"><br>
 <em>Figura 20. Tabla ARP del Router.</em></p>
+<h4 id="verificación-cuantitativa-en-ipv6-ndp-e-icmpv6">Verificación Cuantitativa en IPv6: NDP e ICMPv6</h4>
+<p>Apenas se inicializa la simulación (Véase la Figura 21), se aprecia como el Router 1 envía mensajes de Aviso de Enrutador (Router Advertisement Messages) a ambas subredes.
+<img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-20.png" alt="Lista de Eventos de Inicialización"><br>
+<em>Figura 21. Lista de Eventos de Inicialización.</em></p>
+<p>Luego, al enviar un ping desde H1 hacia H3, se obtiene lo siguiente:</p>
+<ol>
+<li>
+<p>Se genera un ICMP Echo Message, tal como se muestra en la Figura 22. Como H1 no tiene a H3 en su red, decide enviar el paquete hacia el gateway predeterminado, utilizando su IP.</p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-21.png" alt="ICMP Echo Message de H1"><br>
+<em>Figura 22. ICMP Echo Message de H1</em></p>
+</li>
+<li>
+<p>Se reitera el ICMP Echo Message, ilustrado en la Figura 23. Sin embargo, aquí el mensaje lo realiza el Router, cambiando de interfaz para ingresar a la segunda subred, como se aprecia en las direcciones IP.</p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-22.png" alt="ICMP Echo Message de Router 1 entre subredes"><br>
+<em>Figura 23. ICMP Echo Message de Router 1 entre subredes.</em></p>
+</li>
+<li>
+<p>El mensaje de eco es recibido, pasando por el Switch por ambos hosts. H2 lo descarta, mientras que H3 resulta exitoso por lo que devuelve un ICMP Reply hacia el gateway determinado, repitiendo el enrutamiento del Router del punto anterior pero de manera inversa. (Véase las direcciones IP de la Figura 24).</p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-23.png" alt="ICMP Reply del H3"><br>
+<em>Figura 24. ICMP Reply del H3.</em></p>
+</li>
+<li>
+<p>Por último, ya en la subred de H1 el Router resuelve que debe enviarle a ese host la respuesta de eco mediante la interfaz correspondiente y su dirección IP, como se muestra en la Figura 25.</p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-24.png" alt="Recepción de ICMP Reply"><br>
+<em>Figura 25. Recepción de ICMP Reply por parte de H1.</em></p>
+</li>
+</ol>
+<p>De esta forma, resulta exitoso el comando de ping mediante la versión 6.</p>
+<h2 id="conclusión">Conclusión</h2>
+<p>En este trabajo se configuró y analizó una red con direccionamiento IPv4 e IPv6, evaluando su integridad funcional y protocolar mediante la inspección de mensajes ICMP. Se llevaron a cabo pruebas de conectividad a través del envío de paquetes ICMPv4 e ICMPv6 entre distintos hosts, verificando la correcta entrega y respuesta de los mensajes en ambas versiones del protocolo.</p>
+<p>Además, se monitoreó el tráfico de red para identificar los procesos internos involucrados en la comunicación, incluyendo la resolución de direcciones mediante ARP en IPv4 y NDP en IPv6. Se analizaron en detalle los mensajes de solicitud y respuesta generados en cada prueba, validando su comportamiento conforme a los protocolos establecidos.</p>
+<p>Los resultados obtenidos confirmaron que la red se encuentra operativa, permitiendo la comunicación entre dispositivos tanto dentro de una misma subred como a través de un router. La inspección del tráfico ICMP evidenció el correcto funcionamiento de los mecanismos de descubrimiento de vecinos y enrutamiento, garantizando la integridad del sistema.</p>
+<h2 id="bibliografía">Bibliografía</h2>
+<ul>
+<li>Stallings, W. (2004). Data and Computer Communications (7th ed.). Pearson.</li>
+<li>Cisco Networking Academy. (2023). Introduction to Networks (CCNA 1). Cisco Systems. <a href="https://www.netacad.com">https://www.netacad.com</a></li>
+</ul>
 
             
             

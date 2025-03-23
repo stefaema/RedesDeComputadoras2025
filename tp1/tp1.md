@@ -229,7 +229,7 @@ En el desarrollo de esta experiencia, se utilizará el simulador **Packet Tracer
 ### Configuración y Arquitectura de la Red
 
 Se ha configurado para esta experiencia una red compuesta por un router, un switch y tres computadoras interconectadas mediante direcciones IPv4 e IPv6, junto con un esquema dual de subredes, tal como se ilustra en la Figura 5.
-  
+
 ![Esquema Topológico de la Red Propuesta](image-4.png)\
 _Figura 5. Esquema Topológico de la Red Propuesta._
 
@@ -326,3 +326,54 @@ _Figura 19. Tabla ARP de H3._
 
 ![Tabla ARP del Router](image-19.png)\
 _Figura 20. Tabla ARP del Router._
+
+#### Verificación Cuantitativa en IPv6: NDP e ICMPv6
+Apenas se inicializa la simulación (Véase la Figura 21), se aprecia como el Router 1 envía mensajes de Aviso de Enrutador (Router Advertisement Messages) a ambas subredes.
+![Lista de Eventos de Inicialización](image-20.png)\
+_Figura 21. Lista de Eventos de Inicialización._
+
+
+Luego, al enviar un ping desde H1 hacia H3, se obtiene lo siguiente:
+
+
+1.  Se genera un ICMP Echo Message, tal como se muestra en la Figura 22. Como H1 no tiene a H3 en su red, decide enviar el paquete hacia el gateway predeterminado, utilizando su IP.
+   
+    ![ICMP Echo Message de H1](image-21.png)\
+    _Figura 22. ICMP Echo Message de H1_
+
+
+2. Se reitera el ICMP Echo Message, ilustrado en la Figura 23. Sin embargo, aquí el mensaje lo realiza el Router, cambiando de interfaz para ingresar a la segunda subred, como se aprecia en las direcciones IP.
+   
+    ![ICMP Echo Message de Router 1 entre subredes](image-22.png)\
+    _Figura 23. ICMP Echo Message de Router 1 entre subredes._
+
+
+3. El mensaje de eco es recibido, pasando por el Switch por ambos hosts. H2 lo descarta, mientras que H3 resulta exitoso por lo que devuelve un ICMP Reply hacia el gateway determinado, repitiendo el enrutamiento del Router del punto anterior pero de manera inversa. (Véase las direcciones IP de la Figura 24).
+   
+    ![ICMP Reply del H3](image-23.png)\
+    _Figura 24. ICMP Reply del H3._
+
+
+4. Por último, ya en la subred de H1 el Router resuelve que debe enviarle a ese host la respuesta de eco mediante la interfaz correspondiente y su dirección IP, como se muestra en la Figura 25.
+   
+    ![Recepción de ICMP Reply](image-24.png)\
+    _Figura 25. Recepción de ICMP Reply por parte de H1._
+
+
+De esta forma, resulta exitoso el comando de ping mediante la versión 6.
+
+
+## Conclusión
+En este trabajo se configuró y analizó una red con direccionamiento IPv4 e IPv6, evaluando su integridad funcional y protocolar mediante la inspección de mensajes ICMP. Se llevaron a cabo pruebas de conectividad a través del envío de paquetes ICMPv4 e ICMPv6 entre distintos hosts, verificando la correcta entrega y respuesta de los mensajes en ambas versiones del protocolo.
+
+
+Además, se monitoreó el tráfico de red para identificar los procesos internos involucrados en la comunicación, incluyendo la resolución de direcciones mediante ARP en IPv4 y NDP en IPv6. Se analizaron en detalle los mensajes de solicitud y respuesta generados en cada prueba, validando su comportamiento conforme a los protocolos establecidos.
+
+
+Los resultados obtenidos confirmaron que la red se encuentra operativa, permitiendo la comunicación entre dispositivos tanto dentro de una misma subred como a través de un router. La inspección del tráfico ICMP evidenció el correcto funcionamiento de los mecanismos de descubrimiento de vecinos y enrutamiento, garantizando la integridad del sistema.
+
+
+## Bibliografía
+- Stallings, W. (2004). Data and Computer Communications (7th ed.). Pearson.
+- Cisco Networking Academy. (2023). Introduction to Networks (CCNA 1). Cisco Systems. https://www.netacad.com
+

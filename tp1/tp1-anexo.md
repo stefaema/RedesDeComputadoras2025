@@ -230,3 +230,4 @@
 
 ![Envío alternativo UDP](image-31.png)\
 *Figura a7. Envío alternativo del mensaje UDP, desde NoLoSonIEEE hacia Los Peladitos (Grupo que en la experiencia anterior escuchó en el puerto de mirroring), usando la dirección IP de recepción 192.168.1.11/24*
+
