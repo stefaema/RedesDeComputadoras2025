@@ -228,7 +228,8 @@ En el desarrollo de esta experiencia, se utilizará el simulador **Packet Tracer
 
 ### Configuración y Arquitectura de la Red
 
-Se ha configurado para esta experiencia una red compuesta por un router, un switch y tres computadoras interconectadas mediante direcciones IPv4 e IPv6, junto con un esquema dual de subredes, tal como se ilustra en la Figura 5.  
+Se ha configurado para esta experiencia una red compuesta por un router, un switch y tres computadoras interconectadas mediante direcciones IPv4 e IPv6, junto con un esquema dual de subredes, tal como se ilustra en la Figura 5.
+  
 ![Esquema Topológico de la Red Propuesta](image-4.png)\
 _Figura 5. Esquema Topológico de la Red Propuesta._
 
@@ -294,6 +295,7 @@ El proceso es el siguiente:
    
    ![Solicitud ARP](image-13.png)\
    _Figura 14. Solicitud ARP de Host 1._
+
 2. El router responde con su dirección MAC (Es el único dispositivo de la red, por lo que es el único que responde), como se aprecia en la Figura 15.
    
    ![Respuesta ARP](image-14.png)\
