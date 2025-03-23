@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Trabajo Pr&aacute;ctico N&deg; 1&colon; Configuraci&oacute;n y An&aacute;lisis de Tr&aacute;fico IPv4&sol;IPv6</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="trabajo-práctico-n-1-configuración-y-análisis-de-tráfico-ipv4ipv6">Trabajo Práctico N° 1: Configuración y Análisis de Tráfico IPv4/IPv6</h1>
+<p><strong>Grupo</strong><br>
+<em>NoLoSonIEEE</em></p>
+<p><strong>Integrantes</strong><br>
+<em>Fernando E. Stefanovic Carroza</em><br>
+<em>Francisco J. Vásquez</em><br>
+<em>Sofía A. Ávalos</em><br>
+<em>Sofía Viale</em><br>
+<em>Tomás G. Daniel</em></p>
+<p><strong>Institución Educativa</strong><br>
+<em>Universidad Nacional de Córdoba - Facultad de Ciencias Exactas, Físicas y Naturales</em></p>
+<p><strong>Curso</strong><br>
+<em>Cátedra de Redes de Computadoras - Ciclo Lectivo 2025</em></p>
+<p><strong>Profesores</strong><br>
+<em>Facundo N. Oliva Cuneo</em><br>
+<em>Santiago M. Henn</em></p>
+<p><strong>Fecha</strong><br>
+<em>20/03/2025</em></p>
+<h3 id="información-de-los-autores">Información de los Autores</h3>
+<p><strong>Fernando E. Stefanovic Carroza:</strong> <a href="mailto:fernando.stefanovic@mi.unc.edu.ar"><em>fernando.stefanovic@mi.unc.edu.ar</em></a><br>
+<strong>Sofia Viale:</strong> <a href="mailto:sofia.viale@mi.unc.edu.ar"><em>sofia.viale@mi.unc.edu.ar</em></a><br>
+<strong>Francisco J. Vásquez:</strong>: <a href="mailto:javier.vasquez@mi.unc.edu.ar"><em>javier.vasquez@mi.unc.edu.ar</em></a><br>
+<strong>Tomas G. Daniel:</strong> <a href="mailto:tomas.daniel@mi.unc.edu.ar"><em>tomas.daniel@mi.unc.edu.ar</em></a><br>
+<strong>Sofía Aldana Ávalos</strong> <a href="mailto:aldana.avalos@mi.unc.ed.ar"><em>aldana.avalos@mi.unc.edu.ar</em></a></p>
+<h2 id="resumen">Resumen</h2>
+<p>En este trabajo se llevó a cabo la configuración y análisis de una red de computadoras con soporte para IPv4 e IPv6. Se implementó un esquema de interconexión utilizando dispositivos de red que permiten la comunicación entre distintas subredes, evaluando la correcta operación del enrutamiento y la resolución de direcciones. Para verificar la integridad de la red, se realizaron pruebas funcionales mediante el uso de comandos ping y herramientas de captura de tráfico, analizando los mensajes ICMP generados. Se inspeccionaron en detalle los protocolos ARP y NDP, observando su rol en la comunicación y comparación en ambos entornos de direccionamiento. Los resultados obtenidos permitieron validar el correcto funcionamiento de la infraestructura de red, asegurando la conectividad entre dispositivos y la efectividad de los protocolos utilizados.</p>
+<p><strong>Palabras clave</strong>: <em>Redes de computadoras, IPv4, IPv6, ICMP, ARP, NDP, enrutamiento, conectividad.</em></p>
+<h2 id="introducción">Introducción</h2>
+<p>El crecimiento de las redes de computadoras ha impulsado la necesidad de protocolos eficientes que permitan la comunicación entre dispositivos en distintos entornos. IPv4 ha sido el estándar predominante, pero su limitación en el espacio de direccionamiento ha motivado la transición progresiva hacia IPv6, el cual ofrece mayor escalabilidad y eficiencia en la gestión de la red.</p>
+<p>En este trabajo se implementó una infraestructura de red utilizando ambas versiones del protocolo IP para evaluar su funcionamiento y comportamiento en términos de conectividad y resolución de direcciones. Se estableció un esquema de interconexión que involucra múltiples dispositivos y se realizaron pruebas de tráfico utilizando ICMP e ICMPv6.</p>
+<p>El objetivo principal fue analizar la integridad de la red a nivel funcional y protocolar, inspeccionando los mecanismos de descubrimiento de vecinos y enrutamiento. Para ello, se utilizaron herramientas de simulación que permitieron evaluar el flujo de paquetes y la interacción entre los protocolos de capa de red y enlace de datos.</p>
+<p>Este análisis proporciona una comprensión detallada sobre las diferencias y similitudes en la operación de IPv4 e IPv6, destacando el reemplazo de ARP por NDP en la nueva versión del protocolo y la eliminación del concepto de broadcast en favor de multicast. A través de este estudio, se validó la correcta configuración de la red y se verificó su operatividad en distintos escenarios de comunicación.</p>
+<h2 id="marco-teórico">Marco Teórico</h2>
+<h3 id="principio-de-la-interconexión-entre-redes">Principio de la Interconexión entre Redes</h3>
+<p>La interconexión de redes es esencial para el diseño y la operatividad de las infraestructuras de comunicación, ya que <strong>posibilita la comunicación entre dispositivos y sistemas distribuidos en redes diferentes</strong>. Para asegurar la interoperabilidad entre equipos de diversos fabricantes y tecnologías, la comunicación se organiza en capas, según modelos como el OSI (Open Systems Interconnection) y la arquitectura TCP/IP. Cada capa cumple funciones específicas que, en conjunto, facilitan la compatibilidad y el intercambio eficiente de información entre sistemas heterogéneos, como el que se muestra en la Figura 1.</p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-1.png" alt="Interconexión entre Redes"><br>
+<em>Figura 1. Interconexión típica de Redes.</em></p>
+<h3 id="importancia-de-la-arquitectura-en-capas">Importancia de la Arquitectura en Capas</h3>
+<p>Dentro del contexto de la interconexión de redes, se evidencia la adopción del patrón arquitectónico basado en capas. Este enfoque permite descomponer funciones complejas en módulos independientes, facilitando tanto el diseño como el mantenimiento de las infraestructuras. Cada capa asume responsabilidades específicas—desde la transmisión de bits hasta el enrutamiento y la gestión de aplicaciones—permitiendo que distintos protocolos y tecnologías interactúen de manera estructurada y eficiente. Esta organización modular no solo simplifica la implementación y solución de problemas, sino que también logra una de las mejores características que puede existir para las tecnologías que gobiernan nuestra actualidad: <strong>la interoperabilidad entre dispositivos heterogéneos</strong>, abarcando diferencias entre fabricantes, arquitecturas, propósitos e incluso grados de obsolescencia.</p>
+<h3 id="dispositivos-de-red">Dispositivos de Red</h3>
+<p>Debido a la adopción de la arquitectura basada en capas en los sistemas de red, <strong>surge de manera natural la especialización de dispositivos para cada capa específica</strong>. Se utilizan, por ejemplo e ilustrados en la Figura 2, enrutadores o routers para gestionar las operaciones de la capa de red, encargados del encaminamiento y la determinación de rutas óptimas, y conmutadores o switches, que operan en la capa de enlace, facilitando la transmisión de datos en el ámbito local. Además, existen otros dispositivos especializados como puntos de acceso, firewalls y servidores proxy, que complementan la infraestructura, contribuyendo a la seguridad y al control del tráfico de datos en la red.</p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image.png" alt="Dispositivos de Red"><br>
+<em>Figura 2. Dispositivos de Red Típicos.</em></p>
+<h4 id="el-rol-de-los-switches-en-las-redes">El rol de los Switches en las Redes</h4>
+<p>En una red, los switches desempeñan un papel crucial en la entrega eficiente de tramas Ethernet dentro de una misma subred. Mientras que los routers operan en la Capa 3 (Red) y son responsables de la interconexión entre redes distintas, los switches trabajan en la Capa 2 (Enlace de Datos), facilitando la comunicación entre dispositivos dentro de la misma red local.</p>
+<p>Los switches almacenan direcciones MAC en una tabla de conmutación o tabla CAM (Content Addressable Memory), lo que les permite reenviar tramas únicamente a los puertos donde se encuentran los dispositivos de destino, en lugar de retransmitirlas a toda la red. Este proceso optimiza la eficiencia y reduce la congestión dentro del dominio de broadcast.</p>
+<p>Dado que el switch no opera en la capa de red, no requiere una dirección IP para su funcionamiento en una red conmutada. Sin embargo, algunos switches administrables permiten configurar direcciones IP para su gestión remota.</p>
+<p>En el contexto del presente trabajo, el switch interconecta los hosts h2 y h3, facilitando la transmisión de tramas dentro de la subred 192.168.2.0/24 en IPv4 y 2001:aaaa:cccc:1::/64 en IPv6, permitiendo la comunicación sin necesidad de un router cuando ambos dispositivos se encuentran en la misma red.</p>
+<h3 id="cómo-los-dispositivos-de-red-comunican-datos">Cómo los Dispositivos de Red Comunican Datos</h3>
+<p>El proceso de comunicación entre dispositivos de red se basa en el <strong>principio de encapsulación de datos</strong>. Conforme la información desciende por las capas del modelo, cada nivel añade su propia información de control en forma de encabezados (y, en algunos casos, trailers) al paquete original. Estos encabezados contienen datos específicos—como direcciones de origen y destino, protocolos de control y mecanismos de verificación—que aseguran que la información se transmita de forma íntegra y llegue correctamente a su destino. Durante el trayecto, routers y switches realizan <strong>procesos de verificación y decapsulación parcial</strong>, analizando la dirección de destino para elegir la ruta más adecuada mediante el encaminamiento (routing) y transfiriendo el paquete a la siguiente etapa mediante el reenvío (forwarding).</p>
+<p>Además, en cada nodo intermedio de la red, los dispositivos aplican algoritmos que analizan factores críticos como la congestión, el número de saltos (hops) y la disponibilidad de rutas, permitiendo así evitar cuellos de botella y optimizar la entrega de datos. <strong>Los mecanismos de control de congestión y calidad de servicio</strong> (QoS) desempeñan un papel clave en redes complejas, priorizando paquetes críticos—como aquellos utilizados en aplicaciones sensibles a la latencia, como VoIP o transmisión en tiempo real—sobre otros tipos de tráfico. En conjunto, estos procesos permiten que, incluso en condiciones de alta demanda o en presencia de fallos, los dispositivos puedan redirigir los paquetes a través de rutas alternativas, manteniendo la integridad y el rendimiento del sistema de comunicación.</p>
+<h3 id="enfoques-de-interconexión-orientado-a-conexión-vs-sin-conexión">Enfoques de Interconexión: Orientado a Conexión vs. Sin Conexión</h3>
+<p>La interconexión de redes puede clasificarse en dos enfoques principales: orientado a conexión y sin conexión. Cada uno presenta características distintas que determinan cómo se establece y mantiene la comunicación entre dispositivos.</p>
+<p>En el enfoque <strong>orientado a conexión</strong>, se establece un canal de comunicación antes de enviar cualquier dato. Este método garantiza una entrega ordenada y confiable de los paquetes, asegurando que cada uno siga la misma ruta y llegue en el orden correcto. El <strong>Protocolo de Control de Transmisión</strong> (TCP, por sus siglas en inglés) es un ejemplo de este tipo de comunicación. TCP proporciona mecanismos de control de errores y retransmisión en caso de pérdida, asegurando que todos los paquetes enviados sean recibidos y ensamblados correctamente en el destino.</p>
+<p>Por otro lado, la <strong>interconexión sin conexión</strong> no requiere la creación previa de un canal antes del envío de datos. Los paquetes se transmiten de manera independiente y pueden tomar rutas distintas según el estado actual de la red. Un ejemplo característico de este enfoque es el <strong>Protocolo de Internet</strong> (IP), el cual no garantiza ni la entrega ni el orden de los paquetes, delegando esta responsabilidad a los dispositivos receptores, que deben encargarse del reensamblado y detección de errores.</p>
+<p>El enfoque sin conexión brinda mayor flexibilidad y eficiencia en redes dinámicas, ya que permite que los paquetes tomen rutas distintas en caso de congestión o fallos en la infraestructura. Sin embargo, como IP no garantiza la entrega de los paquetes ni su orden de llegada, es necesario utilizar protocolos adicionales en las capas superiores, como TCP, cuando se requiere una comunicación fiable. TCP complementa a IP proporcionando control de errores, confirmación de entrega y reensamblado de los paquetes en el orden correcto, asegurando así una transmisión de datos más confiable en aplicaciones que lo necesiten.</p>
+<h3 id="cómo-los-dispositivos-de-red-se-identifican-y-enrutan-en-la-red">Cómo los Dispositivos de Red se Identifican y Enrutan en la Red</h3>
+<p>En una red, cada dispositivo necesita un identificador único que le permita ser reconocido dentro del entorno de comunicación. En el nivel más básico, esta función es realizada por la <strong>dirección MAC (Media Access Control)</strong>, un identificador asignado de forma única a cada tarjeta de red durante su fabricación. Esta dirección, representada en un formato hexadecimal, está asociada físicamente al hardware y permite la comunicación entre dispositivos dentro de una misma red local.</p>
+<p>Sin embargo, en redes más amplias y estructuradas, donde la comunicación no se limita a un solo segmento de red, es necesario un esquema de direccionamiento que permita la identificación y localización de dispositivos a través de múltiples redes. Para ello, entra en juego el <strong>Protocolo de Internet</strong> (IP), que asigna a cada dispositivo una dirección lógica que puede cambiar dependiendo de la red en la que se encuentre. Esta dirección IP, utilizada en conjunto con mecanismos de enrutamiento, permite que los paquetes de datos sean dirigidos de manera eficiente desde un origen hasta su destino, incluso a través de diferentes redes interconectadas.</p>
+<p>IP es el pilar fundamental de la comunicación en Internet y en redes privadas, operando en la <strong>capa de red</strong> del modelo OSI y formando parte de la suite de protocolos TCP/IP. A lo largo de su evolución, se han desarrollado dos versiones principales: <strong>IPv4 e IPv6</strong>, cada una con características diseñadas para responder a los desafíos del crecimiento exponencial de dispositivos conectados y la necesidad de mayor seguridad y eficiencia en la transmisión de datos.</p>
+<h4 id="ipv4-la-base-del-protocolo-ip">IPv4: La Base del Protocolo IP</h4>
+<p>El <strong>Protocolo de Internet versión 4</strong> (IPv4) ha sido el estándar dominante en redes desde la década de 1980. Utiliza direcciones de 32 bits, lo que permite aproximadamente 4.3 mil millones de direcciones únicas. Si bien esta cantidad era suficiente en sus inicios, el crecimiento exponencial de dispositivos conectados ha generado una escasez de direcciones, lo que ha requerido la implementación de soluciones temporales como la <strong>Traducción de Direcciones de Red</strong> (NAT, Network Address Translation). NAT permite que múltiples dispositivos dentro de una red privada compartan una única dirección IP pública, mitigando la falta de direcciones, pero a costa de generar problemas en ciertas aplicaciones, aumentando la latencia y dificultando la conectividad extremo a extremo.</p>
+<p>Otro inconveniente de IPv4 es su dependencia de mecanismos como <strong>DHCP (Dynamic Host Configuration Protocol)</strong> para la asignación de direcciones IP. En redes dinámicas con una alta rotación de dispositivos, este método puede generar una mayor complejidad en la administración y en la configuración inicial de la red.</p>
+<p>El protocolo opera mediante el envío de datagramas, donde cada paquete es tratado de forma independiente y puede tomar rutas diferentes hasta su destino. Aunque esto proporciona flexibilidad, también introduce desafíos como el desorden en la recepción o la pérdida de paquetes, problemas que son resueltos mediante protocolos complementarios como <strong>TCP</strong>, que garantiza el reensamblado y la integridad de los datos.</p>
+<p>A pesar de haber sido un pilar fundamental en la evolución de Internet, las limitaciones de IPv4 en términos de espacio de direcciones, seguridad y eficiencia en la transmisión fueron evidenciandose al punto en el que cada día esta tecnología se acerca a un estado de obsolescencia.</p>
+<h4 id="ipv6-la-evolución-necesaria">IPv6: La Evolución Necesaria</h4>
+<p><strong>El Protocolo de Internet versión 6</strong> (IPv6) fue diseñado para superar las limitaciones inherentes a IPv4 y asegurar un crecimiento sostenible de Internet. La característica más destacada de IPv6 es el uso de direcciones de 128 bits, lo que permite un espacio de direcciones irrisoriamente grande, asegurando la escalabilidad del Internet en el futuro. Esta expansión es crucial ante el crecimiento exponencial del Internet de las Cosas (IoT) y el aumento constante de dispositivos conectados.</p>
+<p>Además del aumento en la cantidad de direcciones, IPv6 introduce mejoras sustanciales en la eficiencia y seguridad de las comunicaciones. Su estructura de encabezados está optimizada para reducir la carga de procesamiento en los routers, lo que mejora el rendimiento en la transmisión de paquetes. En términos de seguridad, IPv6 incorpora de manera nativa mecanismos como <strong>IPSec</strong>, que garantizan la autenticación y cifrado de los datos, fortaleciendo la protección frente a ataques e interceptaciones.</p>
+<p>Otra característica destacada es la capacidad de los dispositivos para autoconfigurarse sin necesidad de un servidor DHCP, mediante un proceso conocido como <strong>Stateless Address Autoconfiguration</strong> (SLAAC), lo que simplifica la administración de redes. Asimismo, IPv6 ofrece una mejor gestión de la calidad de servicio (<em>QoS</em>), permitiendo la priorización de ciertos tipos de tráfico, como aquellos sensibles a la latencia, optimizando así el rendimiento de aplicaciones en tiempo real como videoconferencias o transmisión de contenido en vivo.</p>
+<p>A pesar de sus ventajas, la adopción de IPv6 ha sido gradual debido a la necesidad de compatibilidad con la infraestructura IPv4 existente. Para facilitar la transición, se han desarrollado mecanismos como <strong>dual stack</strong>, que permite el funcionamiento simultáneo de ambos protocolos en una misma red, y <strong>túneles IPv6 sobre IPv4</strong>, utilizados para garantizar la conectividad entre dispositivos en redes mixtas.</p>
+<p>En la Figura 3, se ilustra las diferencias entre datagramas de ambas versiones.</p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-2.png" alt="IPv4 vs IPv6"><br>
+<em>Figura 3. Datagrama IPv4 (Izquierda) versus IPv6 (Derecha).</em></p>
+<h3 id="cómo-los-dispositivos-encuentran-y-contactan-a-otros-en-la-red">Cómo los Dispositivos Encuentran y Contactan a Otros en la Red</h3>
+<p>Para que los dispositivos en una red puedan comunicarse, es necesario que sepan cómo dirigirse a su destino. Sin embargo, mientras que la <strong>dirección IP</strong> permite identificar de manera lógica a un dispositivo dentro de una red o a través de múltiples redes, la <strong>dirección MAC</strong> es la que realmente permite la entrega de paquetes en el nivel físico dentro de la misma red local. Debido a esto, es esencial contar con mecanismos que permitan asociar estas dos direcciones de manera eficiente.</p>
+<p>En <strong>IPv4</strong>, esta tarea es realizada por el <strong>Address Resolution Protocol</strong> (ARP), mientras que en <strong>IPv6</strong> se emplea el <strong>Neighbor Discovery Protocol</strong> (NDP). Ambos protocolos permiten que un dispositivo pueda encontrar la dirección física correspondiente a una dirección IP antes de enviar paquetes de datos.</p>
+<h4 id="direcciones-broadcast-vs-multicast-en-ipv4">Direcciones Broadcast vs. Multicast en IPv4</h4>
+<p>Las direcciones broadcast permiten enviar mensajes a todos los dispositivos dentro de una red. Por ejemplo, la dirección 255.255.255.255 alcanza toda la red, mientras que 192.168.2.255 solo impacta a los hosts dentro de la subred 192.168.2.0/24. Este mecanismo es común en protocolos como ARP y DHCP, donde un dispositivo necesita comunicarse con todos los demás para obtener información. Sin embargo, puede generar tráfico innecesario al involucrar equipos que no requieren el mensaje.</p>
+<p>Por otro lado, multicast dirige el tráfico solo a un grupo de dispositivos interesados, sin afectar al resto. Funciona dentro del rango de direcciones 224.0.0.0 a 239.255.255.255 y se usa en aplicaciones como streaming de video o protocolos de enrutamiento, optimizando el ancho de banda al evitar envíos masivos innecesarios. Mientras el broadcast impacta a toda la red, el multicast es más eficiente al limitar la difusión solo a quienes lo necesitan.</p>
+<h4 id="arp-en-ipv4-traducción-de-direcciones-para-la-comunicación-local">ARP en IPv4: Traducción de Direcciones para la Comunicación Local</h4>
+<p>En redes basadas en <strong>IPv4</strong>, ARP es el protocolo encargado de encontrar la dirección MAC asociada a una dirección IP dentro de la misma red local (véase la Figura 4). Cuando un dispositivo necesita enviar un paquete, pero desconoce la dirección MAC del destino, realiza una consulta mediante un <strong>mensaje ARP broadcast</strong>, que es recibido por todos los dispositivos en la red.</p>
+<p>El dispositivo cuya dirección IP coincide con la consulta responde enviando un <strong>mensaje ARP unicast</strong>, proporcionando su dirección MAC al emisor. Para optimizar futuras comunicaciones, esta información se almacena en la <strong>tabla ARP</strong> del dispositivo solicitante, evitando la necesidad de repetir el proceso con cada nuevo paquete enviado.</p>
+<p>Durante simulaciones en <strong>Packet Tracer</strong>, es posible observar este proceso al analizar el tráfico <strong>ICMP</strong> entre dispositivos. Por ejemplo, al ejecutar un <strong>ping</strong> entre dos clientes, el primer dispositivo enviará una solicitud ARP antes de poder comunicarse, asegurando que los paquetes ICMP sean entregados correctamente al destino.</p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-3.png" alt="Formato ARP"><br>
+<em>Figura 4. Formato del Paquete ARP.</em></p>
+<h4 id="tipos-de-direcciones-ipv6-y-su-uso">Tipos de Direcciones IPv6 y su Uso</h4>
+<p>IPv6 introduce distintos tipos de direcciones, cada una con un propósito específico:</p>
+<ul>
+<li>
+<p>Direcciones Link-Local: Se asignan automáticamente a cada interfaz y solo son válidas en el segmento de red local (ejemplo: fe80::1). Se usan para descubrimiento de vecinos y configuración automática.</p>
+</li>
+<li>
+<p>Direcciones Unique-Local: Similar a las direcciones privadas en IPv4 (192.168.x.x), utilizadas para redes internas sin necesidad de acceso a Internet (ejemplo: fd00::/8).</p>
+</li>
+<li>
+<p>Direcciones Global Unicast: Son únicas en todo Internet y se utilizan para la comunicación global. Se obtienen a través de un proveedor de servicios o asignadas por una autoridad de direcciones IP (ejemplo: 2001:db8::1).</p>
+</li>
+</ul>
+<p>Cada tipo de dirección tiene un caso de uso específico: Link-Local para comunicación interna en la red, Unique-Local para redes privadas y Global Unicast para comunicación externa en Internet.</p>
+<h4 id="multicast-en-ipv6-y-eliminación-del-broadcast">Multicast en IPv6 y Eliminación del Broadcast</h4>
+<p>IPv6 elimina completamente el concepto de broadcast y en su lugar utiliza multicast para la comunicación con múltiples dispositivos de manera eficiente. Algunas direcciones multicast destacadas en IPv6 incluyen:</p>
+<p>FF02::1: Todos los nodos en la red local.</p>
+<p>FF02::2: Todos los routers en la red local.</p>
+<p>FF02::1:FFXX:XXXX: Dirección especial utilizada en mensajes de Neighbor Solicitation.</p>
+<h4 id="ndp-en-ipv6-más-que-una-simple-resolución-de-direcciones">NDP en IPv6: Más que una Simple Resolución de Direcciones</h4>
+<p>A diferencia de IPv4, IPv6 no utiliza ARP, sino que emplea el Neighbor Discovery Protocol (NDP), un mecanismo más eficiente que no solo resuelve direcciones IP a MAC, sino que también cumple otras funciones esenciales dentro de la administración de la red.</p>
+<p>NDP opera mediante mensajes ICMPv6, eliminando la necesidad de broadcast y reemplazándolo por mensajes multicast dirigidos, lo que reduce la congestión en la red y mejora la escalabilidad. A través de estos mensajes, los dispositivos no solo pueden obtener la dirección MAC de un vecino, sino también detectar su disponibilidad y verificar si ha cambiado de dirección. Además, los routers pueden anunciar su presencia y proporcionar información para que los dispositivos configuren automáticamente sus direcciones sin necesidad de un servidor DHCP.</p>
+<p>Los tipos de mensajes NDP incluyen:</p>
+<ul>
+<li>
+<p>Neighbor Solicitation (NS): Utilizado para solicitar la dirección MAC de una dirección IPv6 específica.</p>
+</li>
+<li>
+<p>Neighbor Advertisement (NA): Responde a un NS con la dirección MAC del dispositivo.</p>
+</li>
+<li>
+<p>Router Solicitation (RS): Un host lo envía para descubrir routers disponibles en la red.</p>
+</li>
+<li>
+<p>Router Advertisement (RA): Un router anuncia su presencia y proporciona información de configuración de red.</p>
+</li>
+<li>
+<p>Redirect: Permite a los routers indicar mejores rutas a los hosts.</p>
+</li>
+</ul>
+<h3 id="control-y-diagnóstico-de-redes-uso-de-icmp">Control y Diagnóstico de Redes: Uso de ICMP</h3>
+<p>Para garantizar el correcto funcionamiento de las redes, el <strong>Protocolo de Control de Mensajes de Internet (ICMP)</strong> permite la detección de errores y la prueba de conectividad entre dispositivos. Herramientas como <strong>ping</strong> y <strong>traceroute</strong> utilizan ICMP para diagnosticar problemas, evaluar tiempos de respuesta y detectar pérdida de paquetes.</p>
+<p>Además, herramientas avanzadas como <strong>Wireshark</strong> permiten capturar tráfico ICMP en tiempo real, facilitando la identificación de errores y la optimización del rendimiento de la red. La combinación de ICMP con herramientas de monitoreo es clave para la administración eficiente de redes modernas.</p>
+<h3 id="emulación-y-simulación-de-entornos-de-red">Emulación y Simulación de Entornos de Red</h3>
+<p>Los simuladores y emuladores son herramientas fundamentales para el análisis y prueba de infraestructuras de red. Aunque comparten ciertos objetivos, difieren en su metodología y aplicación.</p>
+<p>Un <strong>simulador de redes</strong> modela el comportamiento de una red a través de cálculos matemáticos y representaciones lógicas, permitiendo evaluar protocolos, analizar el rendimiento en distintos escenarios y estudiar su comportamiento sin necesidad de hardware físico. Se emplea principalmente en investigación y desarrollo, ya que posibilita pruebas a gran escala con menor costo y mayor flexibilidad. Sin embargo, opera en tiempo no real, lo que permite un análisis más detallado de eventos específicos. Entre los más utilizados destacan <strong>NS-3</strong>, aplicado en estudios de redes móviles y protocolos de comunicación; <strong>OMNeT++</strong>, empleado en simulaciones de redes inalámbricas y sistemas distribuidos; y <strong>QualNet</strong>, diseñado para evaluar redes de gran escala.</p>
+<p>En contraste, un <strong>emulador de redes</strong> replica en tiempo real el comportamiento de una red real, procesando tráfico auténtico e interactuando con dispositivos físicos. Esta capacidad lo hace ideal para pruebas de configuración, formación en redes y validación de infraestructuras antes de su implementación. Su uso es frecuente en la industria y la capacitación profesional, especialmente en certificaciones. Ejemplos destacados incluyen <strong>GNS3</strong>, que emula routers y switches de diversas marcas; <strong>EVE-NG</strong>, con una interfaz avanzada para laboratorios virtuales; y <strong>Mininet</strong>, utilizado en la simulación de redes definidas por software (SDN).</p>
+<p>La diferencia esencial entre ambas herramientas radica en su propósito y nivel de interacción con el hardware. Mientras los <strong>simuladores</strong> permiten evaluar redes en escenarios hipotéticos sin requerir dispositivos físicos, los <strong>emuladores</strong> reproducen entornos en tiempo real, facilitando pruebas prácticas con configuraciones reales. Así, los primeros resultan idóneos para la investigación y el diseño de nuevos protocolos, mientras que los segundos se orientan al desarrollo, capacitación y validación de configuraciones en condiciones operativas.</p>
+<p>En el desarrollo de esta experiencia, se utilizará el simulador <strong>Packet Tracer</strong> desarrollado por Cisco.</p>
+<h2 id="desarrollo">Desarrollo</h2>
+<h3 id="configuración-y-arquitectura-de-la-red">Configuración y Arquitectura de la Red</h3>
+<p>Se ha configurado para esta experiencia una red compuesta por un router, un switch y tres computadoras interconectadas mediante direcciones IPv4 e IPv6, junto con un esquema dual de subredes, tal como se ilustra en la Figura 5.</p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-4.png" alt="Esquema Topológico de la Red Propuesta"><br>
+<em>Figura 5. Esquema Topológico de la Red Propuesta.</em></p>
+<p>De esta forma, el <strong>Router 1</strong> se configura con dos interfaces de red (Ver Figura 6):</p>
+<ul>
+<li><strong>eth0</strong>, que conecta con la computadora <strong>h1</strong> en la subred <strong>192.168.1.0/24</strong> y utiliza la dirección <strong>192.168.1.11</strong> con IPv4 y <strong>2001:aaaa:bbbb:1::11/64</strong> con IPv6.</li>
+<li><strong>eth1</strong>, que conecta con un switch y pertenece a la subred <strong>192.168.2.0/24</strong>, con la dirección <strong>192.168.2.12</strong> en IPv4 y <strong>2001:aaaa:cccc:1::12/64</strong> en IPv6.</li>
+</ul>
+<p>El <strong>Switch 1</strong> interconecta las computadoras <strong>h2</strong> y <strong>h3</strong>, que pertenecen a la subred <strong>192.168.2.0/24</strong>.</p>
+<ul>
+<li><strong>h2</strong> tiene la dirección <strong>192.168.2.10/24</strong> en IPv4 y <strong>2001:aaaa:cccc:1::10/64</strong> en IPv6.</li>
+<li><strong>h3</strong> tiene la dirección <strong>192.168.2.11/24</strong> en IPv4 y <strong>2001:aaaa:cccc:1::11/64</strong> en IPv6.</li>
+</ul>
+<p>Por último, la interfaz <strong>eth0</strong> del <strong>Router 1</strong> se conecta con la computadora <strong>h1</strong>, teniendo esta última la dirección <strong>192.168.1.10/24</strong> en IPv4 y <strong>2001:aaaa:bbbb:1::10/64</strong> en IPv6.</p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-5.png" alt="Comandos Emitidos para la Configuración del Router"><br>
+<em>Figura 6. Comandos Emitidos para la Configuración del Router.</em></p>
+<p>Cabe destacar que para el correcto funcionamiento del direccionamiento versión 6 es necesario para esta versión de Packet Tracer la activación del modo unicast para ipv6, como se indica en la Figura 7.</p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-6.png" alt="Configuración Adicional del Router para IPv6"><br>
+<em>Figura 7. Configuración Adicional del Router para IPv6.</em></p>
+<h3 id="análisis-cualitativo-de-la-integridad-de-la-red">Análisis Cualitativo de la Integridad de la Red</h3>
+<p>Para esta parte del análisis se intentará emitir el comando ping tanto en un ecosistema de versionado IPv4 como IPv6. De esta forma, se podrá analizar si el sistema funciona o no, con un carácter cualitativo y meramente funcional.</p>
+<h4 id="verificación-cualitativa-en-ipv4-icmp">Verificación Cualitativa en IPv4: ICMP</h4>
+<p>En la Figura 8 se muestra con éxito el envío de ping del host 1 a los demás. En la Figura 9, se observa al host 2 enviando un ping exitoso a los otros dos hosts. Por último, en la Figura 10, se aprecia el mismo caso de éxito para el Host 3.</p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-7.png" alt="Resultado del comando Ping para el Host 1."><br>
+<em>Figura 8. Resultado del comando Ping para el Host 1.</em></p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-8.png" alt="Resultado del comando Ping para el Host 2."><br>
+<em>Figura 9. Resultado del comando Ping para el Host 2.</em></p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-9.png" alt="Resultado del comando Ping para el Host 3."><br>
+<em>Figura 10. Resultado del comando Ping para el Host 3.</em></p>
+<h4 id="verificación-cualitativa-en-ipv6-icmpv6">Verificación Cualitativa en IPv6: ICMPv6</h4>
+<p>En la figura 11, se muestra que el host 1 logra enviar pings exitosamente a los demás dispositivos. En la figura 12, se observa que el host 2 también consigue comunicarse sin inconvenientes con los otros dos hosts. Finalmente, en la figura 13, se verifica el mismo resultado satisfactorio para el host 3.</p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-10.png" alt="Resultado del comando Ping para el Host 1."><br>
+<em>Figura 11. Resultado del comando Ping para el Host 1.</em></p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-11.png" alt="Resultado del comando Ping para el Host 2."><br>
+<em>Figura 12. Resultado del comando Ping para el Host 2.</em></p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-12.png" alt="Resultado del comando Ping para el Host 3."><br>
+<em>Figura 13. Resultado del comando Ping para el Host 3.</em></p>
+<h3 id="análisis-cuantitativo-de-la-integridad-de-la-red">Análisis Cuantitativo de la Integridad de la Red</h3>
+<p>En este apartado analítico se hará foco sobre el desglose y traducción de los datos y de los mecanismos internos que se manifiestan al realizar el comando ping (más concretamente, el esquema ICMP), por lo que se considerará de carácter cuantitativo y meramente estructural.</p>
+<h4 id="verificación-cuantitativa-en-ipv4-arp-e-icmp">Verificación Cuantitativa en IPv4: ARP e ICMP</h4>
+<p>Cuando H1 intenta comunicarse con H2, primero verifica si la dirección MAC de H2 está en su tabla ARP. Como están en diferentes redes, H1 en realidad necesitará la dirección MAC del router (puerta de enlace predeterminada).</p>
+<p>El proceso es el siguiente:</p>
+<ol>
+<li>
+<p>H1 envía una solicitud ARP, como se aprecia en la Figura 14.</p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-13.png" alt="Solicitud ARP"><br>
+<em>Figura 14. Solicitud ARP de Host 1.</em></p>
+</li>
+<li>
+<p>El router responde con su dirección MAC (Es el único dispositivo de la red, por lo que es el único que responde), como se aprecia en la Figura 15.</p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-14.png" alt="Respuesta ARP"><br>
+<em>Figura 15. Respuesta ARP del Router.</em></p>
+</li>
+<li>
+<p>H1 encapsula el paquete ICMP en una trama Ethernet con la dirección MAC del router como destino.</p>
+</li>
+<li>
+<p>El router, al recibir el paquete, verifica la dirección IP de destino y reenvía el paquete a H2 si conoce su dirección MAC.</p>
+</li>
+<li>
+<p>Si el router no tiene la MAC de H2 en su tabla ARP, enviará otra solicitud ARP preguntando por la MAC de H2.</p>
+</li>
+<li>
+<p>H2 responde con su dirección MAC, y entonces el router envía el paquete ICMP a H2.</p>
+</li>
+</ol>
+<p>Esta comunicación ICMP <strong>entiende el origen y destino mediante la sección del datagrama correspondiente a ambas direcciones IP</strong> (192.168.1.10 para el origen, 192.168.2.10 para el destino), tal como se muestra en la Figura 16.</p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-15.png" alt="PDU del Mensaje ICMP"><br>
+<em>Figura 16. PDU del Mensaje ICMP</em></p>
+<p>Además, esta comunicación entre subredes es posible gracias al concepto de <strong>tabla de enrutamiento</strong>, donde el Router es capaz de discernir que lo mejor es enviar al paquete ICMP desde su interfaz <strong>eth0</strong> hacia su interfaz <strong>eth1</strong>, ya que en esta última se encuentra la <strong>subred 192.168.2.0/24</strong>, la misma que la del dispositivo de destino.</p>
+<p>Una vez realizado el proceso, las tablas ARP de cada dispositivo se verá modificada. Si originalmente cada host no analizaba a sus vecinos mediante ARP en modo difusión, entonces la tabla ARP del host no involucrado sería nula. Sin embargo, el simulador Packet Tracer ejecuta solicitudes ARP desde un inicio al ver dispositivos con las tablas vacías, por lo que el resultado final para el Host 3 no es nulo. Para cada tabla ARP se brinda las Figuras 17, 18, 19 y 20 respectivamente para los Host 1, 2, 3 y el Router.</p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-16.png" alt="Tabla ARP de H1"><br>
+<em>Figura 17. Tabla ARP de H1.</em></p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-17.png" alt="Tabla ARP de H2"><br>
+<em>Figura 18. Tabla ARP de H2.</em></p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-18.png" alt="Tabla ARP de H3"><br>
+<em>Figura 19. Tabla ARP de H3.</em></p>
+<p><img src="file:///c:\Users\stefa\Desktop\Materias Actuales\Redes de Computadoras\RedesDeComputadoras2025\tp1\image-19.png" alt="Tabla ARP del Router"><br>
+<em>Figura 20. Tabla ARP del Router.</em></p>
+
+            
+            
+        </body>
+        </html>
