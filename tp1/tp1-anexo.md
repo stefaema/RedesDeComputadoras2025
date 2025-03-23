@@ -227,5 +227,6 @@
 ## Observaciones
 - $^1$ En el medio del procedimiento se generó una fe de erratas con respecto a la capitalización de la letra *a* en el nombre del grupo "Taylor Switch". Esto fue corregido en instancias dispares entre las capturas (se realizaron dos intentos exitosos con esa diferencia), de ahí la discrepancia tipográfica de esta letra entre el mensaje obtenido (Figura a5) y el mensaje interceptado (Figura a6).
 - El procedimiento se repitió parcialmente bajo la dinámica "envía NoLoSonIEEE, recibe Los Peladitos, escucha Taylor Switch". Sin embargo, el tiempo se acabo antes de poder culminar con la tarea repetida. De todas maneras, la Figura a7 ilustra el evento de recepción.
+
 ![Envío alternativo UDP](image-31.png)\
 *Figura a7. Envío alternativo del mensaje UDP, desde NoLoSonIEEE hacia Los Peladitos (Grupo que en la experiencia anterior escuchó en el puerto de mirroring), usando la dirección IP de recepción 192.168.1.11/24*
