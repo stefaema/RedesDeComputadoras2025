@@ -163,7 +163,8 @@ Se descargó y preparó la herramienta `iperf3`. Se configuró PC1 como servidor
         *Figura 1.9. Cliente `iperf3` (UDP combinado): Sender logra 10.0 Mbps. Receiver reporta 5.82 Mbps con **41% de pérdida** (22173/53549). Jitter 1.025 ms. Confirma la alta pérdida a 10 Mbps incluso con paquetes grandes y mayor duración.*
 
 ### 2. Actividades Inter-Grupo
-*Nota: Esta actividad es un placeholder hasta tener los contenidos multimedia de todos los grupos implicados*
+
+Para esta actividad, y con un objetivo similar a la sección anterior, se reprodujeron los mismos pasos (configuración de IP's, ping, WireShark e iperf3) pero con una PC externa correspondiente a otro grupo, dentro de una nueva red confomrada por estos dos host y otro dispositivo de capa de enlace distinto al original. Debido a que no hubo ningún cambio en el procedimiento e incluso mantuvimos la misma IP, se decidió omitir el procedimiento descripto en esta sección, además de que no se cuenta con el contenido multimedia correspondiente a esta parte de la experiencia.
 
 ### 3. Prueba Hacia Servidor Remoto
 
