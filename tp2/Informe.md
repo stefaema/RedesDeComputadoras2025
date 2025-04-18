@@ -234,6 +234,6 @@ En resumen, la práctica evidenció la importancia de realizar mediciones con di
 
 *   **iperf3 Documentation:** Página oficial y fuente de descarga. Recuperado de: [`https://iperf.fr/`](https://iperf.fr/)
 *   **Wireshark Documentation:** Página oficial. Recuperado de: [`https://www.wireshark.org/`](https://www.wireshark.org/)
-*   **(Opcional)** Material de configuración de Switches Cisco (según modelo utilizado).
-*   **(Opcional)** Kurose, J. F., & Ross, K. W. (2017). *Computer Networking: A Top-Down Approach* (7th ed.). Pearson.
-*   **(Opcional)** Tanenbaum, A. S., & Wetherall, D. J. (2011). *Computer Networks* (5th ed.). Prentice Hall.
+*   Material de configuración de Switches Cisco (según modelo utilizado).
+*   Kurose, J. F., & Ross, K. W. (2017). *Computer Networking: A Top-Down Approach* (7th ed.). Pearson.
+*   Tanenbaum, A. S., & Wetherall, D. J. (2011). *Computer Networks* (5th ed.). Prentice Hall.
