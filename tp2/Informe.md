@@ -65,7 +65,7 @@ Se realizó la configuración básica del switch para asegurar que los puertos a
 enable
 configure terminal
 interface range fastEthernet 0/1 - 24  # Rango de puertos a habilitar
-no shutdown                         # Activa los puertos seleccionados
+no shutdown                         # Activa los puertos
 exit
 exit
 ```
