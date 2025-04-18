@@ -101,7 +101,7 @@ Se observó respuesta exitosa en ambos casos, confirmando la conectividad local.
 
 #### 1.4. Intercepción de Conectividad (Wireshark)
 
-Mientras se ejecutaba el comando `ping`, se utilizó Wireshark en una de las PCs para capturar el tráfico. Se aplicó un filtro para visualizar los paquetes ICMP.
+Mientras se ejecutaba el comando `ping`, se utilizó Wireshark en una de las PCs para capturar el tráfico. Se aplicó un filtro para visualizar los paquetes con origen de PC 2.
 
 ![Resultado interceptado del ping de PC1 a PC2](img/Figura_1_2.png)\
 *Figura 1.2. Captura de Wireshark mostrando paquetes ICMP entre PC1 y PC2.*
