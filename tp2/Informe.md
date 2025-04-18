@@ -225,7 +225,7 @@ En resumen, la práctica evidenció la importancia de realizar mediciones con di
 
 ## Observaciones
 - Debido a que la PC 1 no contaba con conector RJ-45 para el protocolo Fast Ethernet, se optó por un adaptador genérico USB 2.0 a RJ-45. Debido a que el impacto de este cambio no pudo ser documentado de manera comparativa, se podría decir que este podría ser una causa de la diferencia con respecto a las velocidades máximas, ya que para la conexión con el servidor remoto se recurrió a una conexión inalámbrica.
-- En un momento se modificó la ip de la PC2 de 192.168..1.70 a 192.168.1.10 para acoplarnos mejor a una futura refactorización de direcciones con objetivo de homogenizar ips con el resto de grupos, aunque no lo pudimos concretar. Es por ello que se puede visualizar esa dirección en las capturas de la parte Inter-Grupo.
+- En un momento se modificó la ip de la PC2 de 192.168.1.70 a 192.168.1.10 para acoplarnos mejor a una futura refactorización de direcciones con objetivo de homogenizar ips con el resto de grupos, aunque finalmente no se concretó. Es por ello que se puede visualizar esa dirección en las capturas de la parte Inter-Grupo.
 
 ![Adaptador](img/rj45_usb_adapter.jpg)\
 *Figura 3.1. Adaptador RJ-45 a USB 2.0*
@@ -233,8 +233,8 @@ En resumen, la práctica evidenció la importancia de realizar mediciones con di
 
 ## Bibliografía
 
-*   **iperf3 Documentation:** Página oficial y fuente de descarga. Recuperado de: [`https://iperf.fr/`](https://iperf.fr/)
-*   **Wireshark Documentation:** Página oficial. Recuperado de: [`https://www.wireshark.org/`](https://www.wireshark.org/)
+*   **iperf3 Documentation:** Página oficial y fuente de descarga. Recuperado de: [`https://iperf.fr`](https://iperf.fr).
+*   **Wireshark Documentation:** Página oficial. Recuperado de: [`https://www.wireshark.org`](https://www.wireshark.org).
 *   Material de configuración de Switches Cisco (según modelo utilizado).
 *   Kurose, J. F., & Ross, K. W. (2017). *Computer Networking: A Top-Down Approach* (7th ed.). Pearson.
 *   Tanenbaum, A. S., & Wetherall, D. J. (2011). *Computer Networks* (5th ed.). Prentice Hall.
