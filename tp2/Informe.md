@@ -161,3 +161,74 @@ Se descargó y preparó la herramienta `iperf3`. Se configuró PC1 como servidor
         ```
         ![Salida completa del cliente iperf3 para prueba UDP combinada](img/iperf_c_u_b_t_l.png)\
         *Figura 1.9. Cliente `iperf3` (UDP combinado): Sender logra 10.0 Mbps. Receiver reporta 5.82 Mbps con **41% de pérdida** (22173/53549). Jitter 1.025 ms. Confirma la alta pérdida a 10 Mbps incluso con paquetes grandes y mayor duración.*
+
+### 3. Prueba Hacia Servidor Remoto
+
+Se realizó una prueba desde una PC del grupo (IP local `192.168.136.100` según captura, diferente a las anteriores) hacia un servidor `iperf3` remoto proporcionado, con IP `34.176.225.102` y puerto `2222`. La PC actuó como cliente.
+
+#### 3.1. Prueba de Rendimiento (iperf3)
+
+Se ejecutó la prueba `iperf3` como cliente UDP, intentando alcanzar 10 Mbps.
+
+*   **Cliente UDP con objetivo 10 Mbps:**
+    ```bash
+    iperf3 -c 34.176.225.102 -p 2222 -u -b 10M
+    ```
+
+![Salida del cliente iperf3 hacia servidor remoto](img/iperf_34_176_225_102.png)\
+*Figura 3.1. Cliente `iperf3` (UDP -b 10M) hacia servidor remoto (34.176.225.102:2222). Sender logra 9.99 Mbps. Receiver reporta 9.89 Mbps con **0% de pérdida** (0/9180). Jitter 1.409 ms.*
+
+### 4. Resumen de Comandos Clave Utilizados
+
+*   **Switch:** `enable`, `configure terminal`, `interface range fa0/1-24`, `no shutdown`
+*   **Host (Linux/Windows):** `ping <IP>`, `ip address` / `ipconfig` (para verificar IP)
+*   **iperf3 Servidor:** `iperf3 -s`
+*   **iperf3 Cliente:**
+    *   `iperf3 -c <IP>` (TCP básico)
+    *   `iperf3 -c <IP> -P <num>` (TCP paralelo)
+    *   `iperf3 -c <IP> -u` (UDP básico)
+    *   `iperf3 -c <IP> -u -b <tasa>` (UDP con ancho de banda)
+    *   `iperf3 -c <IP> -t <segundos>` (Duración)
+    *   `iperf3 -c <IP> -u -l <bytes>` (Tamaño paquete UDP)
+    *   `iperf3 -c <IP> -p <puerto>` (Puerto específico)
+*   **Wireshark:** Captura en la interfaz de red, uso de filtros (e.g., `icmp`, `ip.addr == <IP>`)
+
+## Conclusión
+
+Tras analizar los resultados obtenidos en las pruebas realizadas:
+
+1.  **Conectividad y Configuración:** Se configuró con éxito la red local básica (Switch y IPs estáticas) y se verificó la conectividad mediante `ping` (Fig. 1.1) y captura Wireshark (Fig. 1.2). La conectividad con el servidor remoto también fue exitosa (Fig. 3.1).
+
+2.  **Rendimiento TCP Intra-Grupo:** La prueba TCP básica (Fig. 1.4) mostró un rendimiento bajo (~5.5-5.8 Mbps). La prueba con 4 streams paralelos (Fig. 1.8) mejoró ligeramente el agregado (~5.4-6.3 Mbps), pero aún muy por debajo de la capacidad esperada de Fast Ethernet (100 Mbps) o Gigabit Ethernet. La ausencia de retransmisiones sugiere que la limitación no es por pérdida, sino posiblemente por configuración de los hosts (buffers, ventana TCP) o limitaciones del hardware/cableado.
+
+3.  **Rendimiento UDP Intra-Grupo:**
+    *   UDP a 1 Mbps funcionó perfectamente, tanto con tamaño de paquete por defecto (Fig. 1.5) como con 1400 bytes (Fig. 1.6), mostrando 0% de pérdida y bajo jitter.
+    *   Al intentar enviar a 10 Mbps (`-b 10M`), se produjo una **pérdida masiva de ~40-41%** (Fig. 1.7 y Fig. 1.9), independientemente de la duración o el tamaño del paquete. Esto indica un cuello de botella severo en la red local (switch, NICs, buffers) que no puede sostener 10 Mbps de tráfico UDP.
+
+4.  **Rendimiento UDP Remoto:** En marcado contraste, la prueba UDP hacia el servidor remoto a 10 Mbps (Fig. 3.1) tuvo un **rendimiento excelente, con ~9.9 Mbps recibidos y 0% de pérdida**. El jitter (1.4 ms) fue mayor que en la LAN, como es normal en WAN, pero la ausencia de pérdidas fue notable.
+
+5.  **Comparación TCP vs UDP:** UDP superó a TCP (single stream) en bitrate *recibido* en la LAN (~5.8 Mbps vs ~5.5 Mbps), pero a costa de una pérdida inaceptable (>40%) cuando se forzó a 10 Mbps. TCP paralelo (~5.4 Mbps recibidos) fue similar a TCP single stream. UDP demostró ser útil para probar la capacidad máxima *bruta* y encontrar cuellos de botella (evidenciados por la pérdida), mientras que TCP se adaptó (aunque a una tasa baja) sin pérdidas reportadas.
+
+6.  **Impacto de Parámetros:**
+    *   **`-b` (UDP Bandwidth):** Crítico. Pasar de 1 Mbps (éxito) a 10 Mbps (fracaso por pérdida) en la LAN fue el hallazgo más significativo.
+    *   **`-l` (UDP Length):** Cambiar a 1400 bytes no tuvo impacto negativo a 1 Mbps (Fig. 1.6) y tampoco evitó la pérdida a 10 Mbps (Fig. 1.9).
+    *   **`-P` (TCP Parallel):** Aumentó ligeramente el throughput agregado en TCP (Fig. 1.8), sugiriendo que la limitación no era puramente del enlace físico.
+    *   **`-t` (Time):** Extender la duración a 60s (Fig. 1.9) confirmó que la pérdida a 10 Mbps era sostenida.
+
+7.  **Comparación Local vs Remoto:** La red local mostró limitaciones significativas para UDP a 10 Mbps, mientras que la ruta hacia el servidor WAN remoto, en ese momento, no las tenía. Esto demuestra que el rendimiento "local" no es inherentemente superior si existen cuellos de botella específicos, y que las condiciones de la WAN pueden variar enormemente.
+
+En resumen, la práctica evidenció la importancia de realizar mediciones con diferentes protocolos y parámetros. Se identificó un bajo rendimiento general de TCP en la LAN y un severo problema de pérdida de paquetes para UDP a tasas moderadas (10 Mbps) en la misma LAN, contrastando fuertemente con el excelente rendimiento UDP hacia el servidor remoto.
+
+## Observaciones
+- Debido a que la PC 1 no contaba con conector RJ-45 para el protocolo Fast Ethernet, se optó por un adaptador genérico USB 2.0 a RJ-45. Debido a que el impacto de este cambio no pudo ser documentado de manera comparativa, se podría decir que este podría ser una causa de la diferencia con respecto a las velocidades máximas, ya que para la conexión con el servidor remoto se recurrió a una conexión inalámbrica.
+- En un momento se modificó la ip de la PC2 a 192.168.1.10 para acoplarnos mejor a una futura refactorización de direcciones que no pudimos concretar. Por eso es que se puede visualizar esa dirección en las capturas siguientes en la parte Inter-Grupo.
+
+![Adaptador](img/rj45_usb_adapter.jpg)
+
+## Bibliografía
+
+*   **iperf3 Documentation:** Página oficial y fuente de descarga. Recuperado de: [`https://iperf.fr/`](https://iperf.fr/)
+*   **Wireshark Documentation:** Página oficial. Recuperado de: [`https://www.wireshark.org/`](https://www.wireshark.org/)
+*   **(Opcional)** Material de configuración de Switches Cisco (según modelo utilizado).
+*   **(Opcional)** Kurose, J. F., & Ross, K. W. (2017). *Computer Networking: A Top-Down Approach* (7th ed.). Pearson.
+*   **(Opcional)** Tanenbaum, A. S., & Wetherall, D. J. (2011). *Computer Networks* (5th ed.). Prentice Hall.
