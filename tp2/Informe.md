@@ -120,7 +120,7 @@ Se descargó y preparó la herramienta `iperf3`. Se configuró PC1 como servidor
     ![Salida del servidor iperf3 al recibir conexión TCP](img/iperf_s.png)\
     *Figura 1.3. Salida del servidor `iperf3` en PC1 (192.168.1.72) al aceptar una conexión TCP desde PC2 (192.168.1.10).*
 
-*   **Paso 2: Ejecutar pruebas desde PC2 (Cliente - IP: 192.168.1.10 según capturas):**
+*   **Paso 2: Ejecutar pruebas desde PC2:**
 
     *   **Prueba TCP (Básica):**
         ```bash
@@ -161,6 +161,9 @@ Se descargó y preparó la herramienta `iperf3`. Se configuró PC1 como servidor
         ```
         ![Salida completa del cliente iperf3 para prueba UDP combinada](img/iperf_c_u_b_t_l.png)\
         *Figura 1.9. Cliente `iperf3` (UDP combinado): Sender logra 10.0 Mbps. Receiver reporta 5.82 Mbps con **41% de pérdida** (22173/53549). Jitter 1.025 ms. Confirma la alta pérdida a 10 Mbps incluso con paquetes grandes y mayor duración.*
+
+### 2. Actividades Inter-Grupo
+*Nota: Esta actividad es un placeholder hasta tener los contenidos multimedia de todos los grupos implicados*
 
 ### 3. Prueba Hacia Servidor Remoto
 
@@ -221,7 +224,7 @@ En resumen, la práctica evidenció la importancia de realizar mediciones con di
 
 ## Observaciones
 - Debido a que la PC 1 no contaba con conector RJ-45 para el protocolo Fast Ethernet, se optó por un adaptador genérico USB 2.0 a RJ-45. Debido a que el impacto de este cambio no pudo ser documentado de manera comparativa, se podría decir que este podría ser una causa de la diferencia con respecto a las velocidades máximas, ya que para la conexión con el servidor remoto se recurrió a una conexión inalámbrica.
-- En un momento se modificó la ip de la PC2 a 192.168.1.10 para acoplarnos mejor a una futura refactorización de direcciones que no pudimos concretar. Por eso es que se puede visualizar esa dirección en las capturas siguientes en la parte Inter-Grupo.
+- En un momento se modificó la ip de la PC2 de 192.168..1.70 a 192.168.1.10 para acoplarnos mejor a una futura refactorización de direcciones con objetivo de homogenizar ips con el resto de grupos, aunque no lo pudimos concretar. Por eso es que se puede visualizar esa dirección en las capturas de la parte Inter-Grupo.
 
 ![Adaptador](img/rj45_usb_adapter.jpg)\
 *Figura 3.1. Adaptador RJ-45 a USB 2.0*
