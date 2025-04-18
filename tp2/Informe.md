@@ -223,7 +223,9 @@ En resumen, la práctica evidenció la importancia de realizar mediciones con di
 - Debido a que la PC 1 no contaba con conector RJ-45 para el protocolo Fast Ethernet, se optó por un adaptador genérico USB 2.0 a RJ-45. Debido a que el impacto de este cambio no pudo ser documentado de manera comparativa, se podría decir que este podría ser una causa de la diferencia con respecto a las velocidades máximas, ya que para la conexión con el servidor remoto se recurrió a una conexión inalámbrica.
 - En un momento se modificó la ip de la PC2 a 192.168.1.10 para acoplarnos mejor a una futura refactorización de direcciones que no pudimos concretar. Por eso es que se puede visualizar esa dirección en las capturas siguientes en la parte Inter-Grupo.
 
-![Adaptador](img/rj45_usb_adapter.jpg)
+![Adaptador](img/rj45_usb_adapter.jpg)\
+*Figura 3.1. Adaptador RJ-45 a USB 2.0*
+
 
 ## Bibliografía
 
