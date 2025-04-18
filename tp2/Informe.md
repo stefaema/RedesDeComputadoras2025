@@ -1,35 +1,35 @@
 # Trabajo Práctico N° 2: Topologías Multi-path y Evaluación de Performance en Redes
 
-**Grupo**
+**Grupo**  
 *NoLoSonIEEE*
 
-**Integrantes**
-*Fernando E. Stefanovic Carroza*
-*Francisco J. Vásquez*
-*Sofía A. Ávalos*
-*Sofía Viale*
-*Tomás G. Daniel*
+**Integrantes**  
+*Fernando E. Stefanovic Carroza*  
+*Francisco J. Vásquez*  
+*Sofía A. Ávalos*  
+*Sofía Viale*  
+*Tomás G. Daniel*  
 
-**Institución Educativa**
+**Institución Educativa**  
 *Universidad Nacional de Córdoba - Facultad de Ciencias Exactas, Físicas y Naturales*
 
-**Curso**
+**Curso**  
 *Cátedra de Redes de Computadoras - Ciclo Lectivo 2025*
 
-**Profesores**
-*Facundo N. Oliva Cuneo*
-*Santiago M. Henn*
+**Profesores**  
+*Facundo N. Oliva Cuneo*  
+*Santiago M. Henn*  
 
-**Fecha**
+**Fecha**  
 *24/04/2025*
 
 ### Información de los Autores
 
-**Fernando E. Stefanovic Carroza:** [*fernando.stefanovic@mi.unc.edu.ar*](mailto:fernando.stefanovic@mi.unc.edu.ar)
-**Sofia Viale:** [*sofia.viale@mi.unc.edu.ar*](mailto:sofia.viale@mi.unc.edu.ar)
-**Francisco J. Vásquez:**: [*javier.vasquez@mi.unc.edu.ar*](mailto:javier.vasquez@mi.unc.edu.ar)
-**Tomas G. Daniel:** [*tomas.daniel@mi.unc.edu.ar*](mailto:tomas.daniel@mi.unc.edu.ar)
-**Sofía Aldana Ávalos** [*aldana.avalos@mi.unc.edu.ar*](mailto:aldana.avalos@mi.unc.ed.ar)
+**Fernando E. Stefanovic Carroza:** [*fernando.stefanovic@mi.unc.edu.ar*](mailto:fernando.stefanovic@mi.unc.edu.ar)  
+**Sofia Viale:** [*sofia.viale@mi.unc.edu.ar*](mailto:sofia.viale@mi.unc.edu.ar)  
+**Francisco J. Vásquez:**: [*javier.vasquez@mi.unc.edu.ar*](mailto:javier.vasquez@mi.unc.edu.ar)  
+**Tomas G. Daniel:** [*tomas.daniel@mi.unc.edu.ar*](mailto:tomas.daniel@mi.unc.edu.ar)  
+**Sofía Aldana Ávalos** [*aldana.avalos@mi.unc.edu.ar*](mailto:aldana.avalos@mi.unc.ed.ar)  
 
 ## Resumen
 
