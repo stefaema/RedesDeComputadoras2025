@@ -395,3 +395,208 @@ Se aplicaron configuraciones análogas en los routers `R2`, `R3`, `R4` y `R5`, a
 #### 3.3.2. Verificación de Vecindades y Proceso OSPF en R2
 
 Una vez configurado OSPF, es crucial verificar que los routers establezcan relaciones de vecindad (estado `FULL`) y que el proceso OSPF general funcione correctamente. Se examinan específicamente las operaciones en R2.
+
+**Verificación de Vecinos en R2:**
+
+Se verifica la información de los vecinos R1 y R3 desde R2 utilizando el comando `show ip ospf neighbor`. La salida esperada se genera con el comando detallado en el *Snippet A* a continuación.
+
+```
+Router>show ip ospf neighbor
+
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+1.1.1.1           1   FULL/DR         00:00:37    192.168.1.1     GigabitEthernet0/1
+3.3.3.3           1   FULL/DR         00:00:30    192.168.2.2     GigabitEthernet0/2
+```
+
+El análisis de la salida confirma que R2 ha establecido exitosamente las adyacencias esperadas con R1 (`1.1.1.1`) y R3 (`3.3.3.3`), ambas en estado `FULL`, indicando LSDBs sincronizadas.
+
+**Verificación del Proceso OSPF General en R2:**
+
+Se consulta información general sobre las operaciones del protocolo en R2 utilizando el comando `show ip ospf`. La salida esperada se genera con el comando detallado en el snippet a continuación.
+
+```
+Router>show ip ospf
+ Routing Process "ospf 1" with ID 2.2.2.2
+ Supports only single TOS(TOS0) routes
+ Supports opaque LSA
+ SPF schedule delay 5 secs, Hold time between two SPFs 10 secs
+ Minimum LSA interval 5 secs. Minimum LSA arrival 1 secs
+ Number of external LSA 0. Checksum Sum 0x000000
+ Number of opaque AS LSA 0. Checksum Sum 0x000000
+ Number of DCbitless external and opaque AS LSA 0
+ Number of DoNotAge external and opaque AS LSA 0
+ Number of areas in this router is 1. 1 normal 0 stub 0 nssa
+ External flood list length 0
+    Area BACKBONE(0)
+        Number of interfaces in this area is 3
+        Area has no authentication
+        SPF algorithm executed 17 times
+        Area ranges are
+        Number of LSA 11. Checksum Sum 0x070388
+        Number of opaque link LSA 0. Checksum Sum 0x000000
+        Number of DCbitless LSA 0
+        Number of indication LSA 0
+        Number of DoNotAge LSA 0
+        Flood list length 0
+```
+
+La salida de este comando confirma varios puntos clave sobre el estado de OSPF en R2:
+*   El **Router ID** del proceso OSPF 1 está correctamente establecido en `2.2.2.2`.
+*   R2 participa actualmente en **una sola área**, identificada como **Área BACKBONE(0)**, que es una "normal area" (no stub ni NSSA).
+*   Dentro del Área 0, R2 tiene **3 interfaces** participando activamente en OSPF, lo cual coincide con sus conexiones a S1, R1 y R3.
+*   El **algoritmo SPF** se ha ejecutado 17 veces, indicando que el router ha calculado (y potencialmente recalculado) las rutas basadas en la información topológica recibida.
+*   La base de datos para el Área 0 contiene **11 LSAs** (`Number of LSA 11`), lo cual es consistente con la cantidad de LSAs Tipo 1 (uno por cada router) y Tipo 2 (uno por cada segmento inter-router tratado como broadcast) esperada en esta topología y configuración inicial.
+
+#### 3.3.3. Verificación de la Base de Datos de Estado de Enlace (LSDB)
+
+Una vez que los routers establecen vecindades, intercambian información sobre la topología mediante LSAs (Link State Advertisements). Cada router almacena los LSAs recibidos para su área en la Base de Datos de Estado de Enlace (LSDB), que representa el "mapa" completo de la red desde la perspectiva de OSPF. Antes de calcular las rutas, es fundamental verificar que esta LSDB se haya construido correctamente y sea consistente entre los routers del área.
+
+Se utiliza el comando `show ip ospf database` para inspeccionar el contenido de la LSDB.
+
+**Verificación en R1:**
+```
+Router>show ip ospf database
+            OSPF Router with ID (1.1.1.1) (Process ID 1)
+
+                Router Link States (Area 0)
+
+Link ID         ADV Router      Age         Seq#       Checksum Link count
+1.1.1.1         1.1.1.1         272         0x80000008 0x005513 3
+2.2.2.2         2.2.2.2         271         0x80000008 0x002a83 3
+4.4.4.4         4.4.4.4         86          0x80000010 0x00cfb9 3
+3.3.3.3         3.3.3.3         78          0x80000012 0x00f58e 4
+5.5.5.5         5.5.5.5         78          0x8000000f 0x00e29b 3
+
+                Net Link States (Area 0)
+Link ID         ADV Router      Age         Seq#       Checksum
+192.168.1.1     1.1.1.1         916         0x80000003 0x00af1f
+192.168.6.2     3.3.3.3         272         0x80000005 0x00e106
+192.168.2.2     3.3.3.3         271         0x80000005 0x0069ea
+192.168.3.2     4.4.4.4         107         0x80000003 0x0051fa
+192.168.5.2     5.5.5.5         86          0x80000003 0x00ad9f
+192.168.4.2     5.5.5.5         78          0x80000003 0x0098a4
+```
+
+
+**Verificación en R3:**
+```
+Router>show ip ospf database
+            OSPF Router with ID (3.3.3.3) (Process ID 1)
+
+                Router Link States (Area 0)
+
+Link ID         ADV Router      Age         Seq#       Checksum Link count
+1.1.1.1         1.1.1.1         382         0x80000008 0x005513 3
+2.2.2.2         2.2.2.2         381         0x80000008 0x002a83 3
+4.4.4.4         4.4.4.4         197         0x80000010 0x00cfb9 3
+3.3.3.3         3.3.3.3         188         0x80000012 0x00f58e 4
+5.5.5.5         5.5.5.5         188         0x8000000f 0x00e29b 3
+
+                Net Link States (Area 0)
+Link ID         ADV Router      Age         Seq#       Checksum
+192.168.1.1     1.1.1.1         1027        0x80000003 0x00af1f
+192.168.6.2     3.3.3.3         382         0x80000005 0x00e106
+192.168.2.2     3.3.3.3         381         0x80000005 0x0069ea
+192.168.3.2     4.4.4.4         217         0x80000003 0x0051fa
+192.168.5.2     5.5.5.5         197         0x80000003 0x00ad9f
+192.168.4.2     5.5.5.5         188         0x80000003 0x0098a4
+```
+
+En la salida anterior, se pueden identificar los diferentes tipos de LSAs:
+*   **Router Link States (Tipo 1):** Cada router en el Área 0 (R1 a R5) genera un LSA de este tipo, identificado por su propio Router ID (`Link ID` y `ADV Router`). Describe los enlaces directos de ese router. Se espera ver 5 LSAs Tipo 1.
+*   **Net Link States (Tipo 2):** Son generados por el Router Designado (DR) en segmentos donde se realiza una elección DR/BDR. Esto se debe a que las interfaces Ethernet, por defecto, son tratadas por OSPF como tipo de red 'BROADCAST', lo que fuerza una elección de DR y la consiguiente generación de un LSA Tipo 2 por parte del DR en cada uno de esos enlaces punto a punto simulados. El `Link ID` en cada caso corresponde a la IP del DR en ese segmento específico.
+
+La consistencia de la LSDB entre R1 y R3 (y los demás routers del área) confirma que la información topológica se ha distribuido correctamente, proporcionando la base necesaria para que el algoritmo SPF calcule las rutas óptimas.
+
+#### 3.3.4. Verificación de Rutas OSPF en la Tabla de Enrutamiento
+Debido a que el objetivo final, como se describió en la sección introductoria, es poblar la tabla de enrutamiento (RIB) con las mejores rutas, es crucial verificar que esto se cumpla. Esta verificación se puede realizar mediante el comando `show ip route`.
+
+**Verficación para R5**
+
+```
+Router>show ip route
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     1.0.0.0/32 is subnetted, 1 subnets
+O       1.1.1.1/32 [110/3] via 192.168.4.1, 00:14:44, GigabitEthernet0/3/0
+     172.16.0.0/16 is variably subnetted, 4 subnets, 2 masks
+O       172.16.1.0/24 [110/3] via 192.168.4.1, 00:14:44, GigabitEthernet0/3/0
+O       172.16.2.0/24 [110/2] via 192.168.5.1, 00:14:44, GigabitEthernet0/2
+C       172.16.3.0/24 is directly connected, GigabitEthernet0/0
+L       172.16.3.1/32 is directly connected, GigabitEthernet0/0
+     192.168.1.0/30 is subnetted, 1 subnets
+O       192.168.1.0/30 [110/3] via 192.168.4.1, 00:14:44, GigabitEthernet0/3/0
+     192.168.2.0/30 is subnetted, 1 subnets
+O       192.168.2.0/30 [110/2] via 192.168.4.1, 00:14:44, GigabitEthernet0/3/0
+     192.168.3.0/30 is subnetted, 1 subnets
+```
+
+De esta forma, se verifica que para el Router 5 el protocolo permitió *"aprender"* lo siguiente acerca de cómo hallar a sus pares y otras redes remotas:
+
+*   Para llegar a la dirección loopback de R1 (`1.1.1.1/32`), el costo es 3 (por la ruta `R5->R3->R1`, asumiendo un costo de 1 por cada enlace GigabitEthernet) y el siguiente salto es `192.168.4.1` (la interfaz de R3 conectada a R5).
+*   Para llegar a la subred `172.16.1.0/24` (donde residen los hosts h1 a h3, conectados a R2), el costo también es 3 (siguiendo la ruta `R5->R3->R2`) y el siguiente salto es, nuevamente, hacia R3 (`192.168.4.1`).
+*   Para alcanzar la subred `172.16.2.0/24` (la red del host h4, conectado a R4), el costo es menor, 2 (indicando una ruta más directa: `R5->R4`), y el siguiente salto es `192.168.5.1` (la interfaz de R4 conectada a R5).
+*   Para llegar a la red del enlace entre R1 y R2 (`192.168.1.0/30`), el costo es 3 (por la ruta `R5->R3->R1` o `R5->R3->R2`) con el siguiente salto hacia R3 (`192.168.4.1`).
+*   Finalmente, para alcanzar la red del enlace entre R2 y R3 (`192.168.2.0/30`), el costo es 2 (ruta `R5->R3`) y el siguiente salto es hacia R3 (`192.168.4.1`).
+
+Así, se demuestra que OSPF ha convergido, permitiendo a R5 conocer las rutas óptimas (basadas en el costo acumulado) hacia todas las demás subredes dentro del dominio OSPF configurado.
+
+#### 3.3.5. Verificación Específica en R2 (Consigna 7)
+
+Complementando las verificaciones anteriores, se examina con más detalle el estado de OSPF específicamente en el Router R2, consultando el estado de sus vecinos directos (R1 y R3) y los parámetros generales del proceso OSPF en ejecución.
+
+**Información de Vecinos OSPF en R2 (Consigna 7a):**
+
+Se utiliza `show ip ospf neighbor` para confirmar el estado de las adyacencias que R2 ha formado.
+
+**Salida del Comando en R2:**
+
+[SNIPPET_NEIGHBOR_R2_AQUI]
+
+*(Nota: Reemplazar el placeholder con la salida real del comando `show ip ospf neighbor` ejecutado en R2).*
+
+El análisis de la salida confirma que R2 ha establecido exitosamente las adyacencias esperadas con R1 (`1.1.1.1`) y R3 (`3.3.3.3`), ambas en estado `FULL`, indicando LSDBs sincronizadas.
+
+**Información General del Proceso OSPF en R2 (Consigna 7b):**
+
+Se utiliza `show ip ospf` para obtener una visión general del proceso OSPF en R2.
+
+**Salida del Comando en R2:**
+
+[SNIPPET_OSPF_R2_AQUI]
+
+*(Nota: Reemplazar el placeholder con la salida real del comando `show ip ospf` ejecutado en R2).*
+
+La salida de este comando confirma el Router ID (`2.2.2.2`), las áreas activas (Área 0), las interfaces participantes y estadísticas sobre la ejecución del algoritmo SPF, proporcionando una visión completa del estado del proceso OSPF en R2 en esta configuración inicial de área única.
+
+### 3.4. Ciclo de Mensajes OSPF: Análisis de la Re-convergencia
+
+En su funcionamiento normal y estable, OSPF es bastante silencioso. Los routers que ya han alcanzado una adyacencia completa (estado `FULL`) simplemente se envían **Paquetes Hello** periódicos para confirmar que siguen activos, como se muestra en las Figuras 3.3 y 3.4, que ilustran un Hello típico en esta fase estable.
+
+<center>
+
+![Paquete Hello Vista General](img/OSPFHello1.png)\
+Figura 3.3. Vista General de un Paquete OSPF Hello (Estado Estable)
+
+</center>
+
+<center>
+
+![Paquete Hello PDU](img/OSPFHello2.png)\
+Figura 3.4. PDU de un Paquete OSPF Hello (Estado Estable)
+
+</center>
+
+Para observar cómo OSPF maneja la dinámica de establecimiento y sincronización, provocamos una re-convergencia. Esto se hizo ejecutando `clear ip ospf process` específicamente en R5. Este comando borra el estado OSPF activo de R5 (vecinos, LSDB), forzándolo a empezar de nuevo con sus vecinos R3 y R4. Analizamos la secuencia de mensajes resultante en el modo **Simulación** de Packet Tracer, filtrando por **OSPF**.
+
+La secuencia observada tras el reinicio de OSPF en R5 se desarrolló en las siguientes fases:
+
