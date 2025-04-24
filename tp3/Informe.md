@@ -188,3 +188,210 @@ Este trabajo práctico tiene como finalidad la aplicación concreta de los conce
 ### 2.4. Metodología y Entorno de Simulación
 
 Para alcanzar los objetivos propuestos, se empleará un software de simulación o virtualización de redes. La elección recae en Cisco Packet Tracer. Esta herramienta permite simular la topología de red especificada en la consigna, que consta de múltiples routers con conexiones redundantes, varios hosts y switches, proporcionando un entorno realista para la configuración, prueba y análisis del protocolo OSPF. Se configurarán las direcciones IP según un esquema predefinido y se implementará OSPF siguiendo los pasos detallados en la sección de desarrollo, verificando cada etapa mediante comandos de diagnóstico y pruebas de conectividad.
+
+## 3. Desarrollo: Implementación y Análisis de OSPF
+
+### 3.1. Diseño del Esquema de Direccionamiento IP
+
+Para la configuración inicial de la red, se estableció un plan de direccionamiento IP lógico y escalable. Este plan se basa en el uso de direcciones IP privadas (RFC 1918) y distingue entre las necesidades de direccionamiento de las redes de usuarios finales y las conexiones de infraestructura entre routers.
+
+#### 3.1.1. Fundamentos de la Elección de Rangos Base
+
+La selección de los bloques de direcciones IP iniciales se realizó considerando las características generales de los rangos privados disponibles y la naturaleza de los segmentos a direccionar:
+
+*   **Uso de Rangos Privados (RFC 1918):** Se decidió utilizar exclusivamente direcciones IP de los rangos privados para evitar conflictos con el espacio de direccionamiento público de Internet y seguir las convenciones estándar. Los rangos privados disponibles son:
+    *   `10.0.0.0` a `10.255.255.255` (Asociado a Clase A)
+    *   `172.16.0.0` a `172.31.255.255` (Asociado a Clase B)
+    *   `192.168.0.0` a `192.168.255.255` (Asociado a Clase C)
+
+*   **Rango Base para Redes de Hosts:** Se eligió el bloque `172.16.0.0` como punto de partida para las redes que conectan a los dispositivos finales (hosts h1-h5). Este rango, perteneciente al espacio privado asociado a la Clase B, ofrece un número considerable de direcciones, proporcionando flexibilidad para futuras expansiones o segmentaciones adicionales si fuesen necesarias.
+
+*   **Rango Base para Enlaces Inter-Router:** Para las conexiones directas entre los routers (R1-R2, R2-R3, etc.), se seleccionó el bloque `192.168.0.0`. Este rango, asociado al espacio privado de Clase C, es comúnmente utilizado para redes de menor tamaño o segmentos de infraestructura.
+
+*   **Dirección para Interfaz Loopback (R1):** Se decidió asignar la dirección `1.1.1.1` a la interfaz loopback de R1. Aunque pertenece a un rango público, su uso es frecuente en entornos controlados de laboratorio para proporcionar un identificador único y estable al router, útil para protocolos de enrutamiento y gestión.
+
+#### 3.1.2. Estrategia de Subred Aplicada
+
+Una vez seleccionados los rangos base, se aplicó una estrategia de desiganción de subredes para dividir estos bloques en redes más pequeñas y adecuadas para cada segmento específico de la topología:
+
+*   **Subredes para Redes de Hosts:** A partir del rango base `172.16.0.0`, se optó por aplicar una máscara de subred `255.255.255.0` (`/24`). Esta decisión se basa en la necesidad de crear segmentos de red (dominios de broadcast) separados para cada grupo de hosts (h1-h3, h4, h5). La máscara `/24` divide el rango `172.16.x.x` en múltiples subredes, cada una con capacidad para 254 hosts. Este tamaño es considerado estándar y práctico para redes de área local (LAN), permitiendo una gestión clara y conteniendo el tráfico de broadcast. Las subredes específicas asignadas son:
+    *   `172.16.1.0/24` (para h1, h2, h3)
+    *   `172.16.2.0/24` (para h4)
+    *   `172.16.3.0/24` (para h5)
+
+*   **Subredes para Enlaces Inter-Router:** Para los enlaces punto a punto que conectan directamente pares de routers, se aplicó una máscara `255.255.255.252` (`/30`) sobre el rango base `192.168.0.0`. Esta máscara es la más eficiente para este tipo de conexión, ya que crea subredes que contienen solo 4 direcciones IP en total: la dirección de red, la dirección de broadcast y dos direcciones utilizables, exactamente una para cada interfaz del router en el enlace. Esto evita el desperdicio de direcciones IP que ocurriría si se usara una máscara más grande (como /24) en un enlace que solo necesita dos direcciones. Las subredes `/30` asignadas son:
+    *   `192.168.1.0/30` (R1-R2)
+    *   `192.168.2.0/30` (R2-R3)
+    *   `192.168.3.0/30` (R3-R4)
+    *   `192.168.4.0/30` (R3-R5)
+    *   `192.168.5.0/30` (R4-R5)
+
+*   **Máscara para Interfaz Loopback:** A la dirección `1.1.1.1` de la interfaz loopback de R1 se le asignó la máscara `255.255.255.255` (`/32`). Esta máscara indica que la dirección representa a un único host (el propio router en este caso) y no a una red.
+
+#### 3.1.3. Tabla de Direccionamiento IP
+
+La siguiente tabla resume la asignación específica de direcciones IP a cada interfaz y host, de acuerdo con el esquema de direccionamiento y la estrategia de subneteo definidos previamente.
+
+| Dispositivo | Interfaz             | Dirección IP      | Máscara de Subred | Gateway por Defecto | Red              |
+| :---------- | :------------------- | :---------------- | :---------------- | :------------------ | :--------------- |
+| **Hosts**   |                      |                   |                   |                     |                  |
+| h1          | FastEthernet0        | 172.16.1.10       | 255.255.255.0     | 172.16.1.1          | 172.16.1.0/24    |
+| h2          | FastEthernet0        | 172.16.1.11       | 255.255.255.0     | 172.16.1.1          | 172.16.1.0/24    |
+| h3          | FastEthernet0        | 172.16.1.12       | 255.255.255.0     | 172.16.1.1          | 172.16.1.0/24    |
+| h4          | FastEthernet0        | 172.16.2.10       | 255.255.255.0     | 172.16.2.1          | 172.16.2.0/24    |
+| h5          | FastEthernet0        | 172.16.3.10       | 255.255.255.0     | 172.16.3.1          | 172.16.3.0/24    |
+| **Routers** |                      |                   |                   |                     |                  |
+| **R1**      | Loopback0            | 1.1.1.1           | 255.255.255.255   | N/A                 | 1.1.1.1/32       |
+|             | `Gi0/0` *(a R2)*     | 192.168.1.1       | 255.255.255.252   | N/A                 | 192.168.1.0/30   |
+|             | `Gi0/1` *(a R3)*     | 192.168.6.1       | 255.255.255.252   | N/A                 | 192.168.6.0/30   |
+| **R2**      | `Gi0/0` *(a S1)*     | 172.16.1.1        | 255.255.255.0     | N/A                 | 172.16.1.0/24    |
+|             | `Gi0/1` *(a R1)*     | 192.168.1.2       | 255.255.255.252   | N/A                 | 192.168.1.0/30   |
+|             | `Gi0/2` *(a R3)*     | 192.168.2.1       | 255.255.255.252   | N/A                 | 192.168.2.0/30   |
+| **R3**      | `Gi0/0` *(a R2)*     | 192.168.2.2       | 255.255.255.252   | N/A                 | 192.168.2.0/30   |
+|             | `Gi0/1` *(a R1)*     | 192.168.6.2       | 255.255.255.252   | N/A                 | 192.168.6.0/30   |
+|             | `Gi0/2` *(a R4)*     | 192.168.3.1       | 255.255.255.252   | N/A                 | 192.168.3.0/30   |
+|             | `Gi0/3/0` *(a R5)*   | 192.168.4.1       | 255.255.255.252   | N/A                 | 192.168.4.0/30   |
+| **R4**      | `Gi0/0` *(a R3)*     | 192.168.3.2       | 255.255.255.252   | N/A                 | 192.168.3.0/30   |
+|             | `Gi0/1` *(a h4)*     | 172.16.2.1        | 255.255.255.0     | N/A                 | 172.16.2.0/24    |
+|             | `Gi0/2` *(a R5)*     | 192.168.5.1       | 255.255.255.252   | N/A                 | 192.168.5.0/30   |
+| **R5**      | `Gi0/0` *(a h5)*     | 172.16.3.1        | 255.255.255.0     | N/A                 | 172.16.3.0/24    |
+|             | `Gi0/2` *(a R4)*     | 192.168.5.2       | 255.255.255.252   | N/A                 | 192.168.5.0/30   |
+|             | `Gi0/3/0` *(a R3)*   | 192.168.4.2       | 255.255.255.252   | N/A                 | 192.168.4.0/30   |
+
+<center>
+Tabla 3.1. Tabla de Direccionamiento IP
+</center>
+
+
+### 3.2. Implementación de la Topología y Configuraciones Iniciales
+Una vez diseñado el esquema de direccionamiento IP, el siguiente paso consiste en implementar la topología de red en el entorno de simulación y configurar las direcciones IP en cada dispositivo. Posteriormente, se realiza una verificación fundamental de la conectividad de Capa 3 para asegurar que la infraestructura base está operativa antes de introducir protocolos de enrutamiento dinámico.
+
+#### 3.2.1. Implementación de la Topología en Packet Tracer
+La topología de red descrita en los requisitos se implementó utilizando el software Cisco Packet Tracer (Figura 3.1). Se dispusieron los siguientes dispositivos en el espacio de trabajo lógico:
+*   Cinco routers (nombrados R1, R2, R3, R4, R5), todos de modelo 2911.
+*   Un switch (nombrado S1), modelo 2960-24TT.
+*   Cinco hosts (nombrados h1, h2, h3, h4, h5).
+
+Se utilizaron las herramientas de conexión de Packet Tracer (seleccionando el tipo de cable apropiado, típicamente Cobre Directo, excepto para el Router que debió usar cuatro interfaces, que se verá en la sección de Observaciones)
+*   h1, h2, h3 conectados a S1.
+*   S1 conectado a una interfaz de R2.
+*   R2 conectado a R1 y R3.
+*   R1 conectado a R3 (completando el triángulo R1-R2-R3).
+*   R3 conectado a R4 y R5.
+*   R4 conectado a R5 (completando el triángulo R3-R4-R5).
+*   h4 conectado directamente a R4.
+*   h5 conectado directamente a R5.
+
+<center>
+
+![Topología de red](img/net_topology.png)\
+Figura 3.1. Topología de Red
+
+</center>
+
+#### 3.2.2. Configuración de IPs Iniciales
+Mediante el uso de la pestaña de IP Configuration dentro de las opciones de cada host, se configuró tanto la IP como la máscara de subred y el Default Gateway de cada uno, como se muestra en la Figura 3.2.
+
+<center>
+
+![IP Config de h3](img/h3_ip_config.png)\
+Figura 3.2. Configuración para el Host 3
+
+</center>
+
+Luego, y a través de la CLI de cada Router, se procedió con la configuración de las interfaces. El código empleado para el Router 1 se encuentra a continuación. Se aplicaron comandos similares para el resto de dispositivos, con evidentes cambios para configurar exactamente las IPs presentadas en la sección anterior.
+
+```
+Router>en
+Router#conf t
+Router(config)#interface Loopback0
+Router(config-if)#ip address 1.1.1.1 255.255.255.255
+Router(config-if)#no shutdown
+Router(config-if)#exit
+Router(config)#interface GigabitEthernet0/0
+Router(config-if)#description Enlace a R2
+Router(config-if)#ip address 192.168.1.1 255.255.255.252
+Router(config-if)#no shutdown
+Router(config-if)#exit
+Router(config)#interface GigabitEthernet0/1
+Router(config-if)#description Enlace a R3
+Router(config-if)#ip address 192.168.6.1 255.255.255.252
+Router(config-if)#exit
+```
+
+Una vez configurado, se verificó de manera teórica que las interfaces estén bien configuradas.
+
+```
+Router#show ip interface brief
+Interface IP-Address OK? Method Status Protocol
+GigabitEthernet0/0 192.168.1.1 YES manual up up
+GigabitEthernet0/1 192.168.6.1 YES manual up up
+GigabitEthernet0/2 unassigned YES unset administratively down down
+Loopback0 1.1.1.1 YES manual up up
+Vlan1 unassigned YES unset administratively down down
+
+```
+
+#### 3.2.3. Verificación de las Configuraciones
+Por último, se llevó a cabo un régimen exhaustivo de verificación mediante el uso de comandos ping, con el objetivo de afirmar si efectivamente las redes fueron configuradas correctamente.
+- **Ping entre Routers:** Se adjunta el resultado exitoso de realizar ping entre los Routers 3 y 4.
+    ```
+    
+    Router>ping 192.168.3.2
+
+    Type escape sequence to abort.
+    Sending 5, 100-byte ICMP Echos to 192.168.3.2, timeout is 2 seconds:
+    !!!!!
+    Success rate is 100 percent (5/5), round-trip min/avg/max = 0/5/10 ms
+    
+    ```
+- **Ping de host a Gateway**: Se adjunta el resultado exitoso de realizar ping entre el Host 1 y el Router 2.
+    ```
+    C:\>ping 172.16.1.1
+
+    Pinging 172.16.1.1 with 32 bytes of data:
+
+    Reply from 172.16.1.1: bytes=32 time<1ms TTL=255
+    Reply from 172.16.1.1: bytes=32 time<1ms TTL=255
+    Reply from 172.16.1.1: bytes=32 time<1ms TTL=255
+    Reply from 172.16.1.1: bytes=32 time<1ms TTL=255
+
+    Ping statistics for 172.16.1.1:
+        Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+    Approximate round trip times in milli-seconds:
+        Minimum = 0ms, Maximum = 0ms, Average = 0ms
+    
+    ```
+
+### 3.3. Configuración de OSPF y Verificación Inicial
+
+Con la configuración IP base y la conectividad directa verificada, el siguiente paso es habilitar el enrutamiento dinámico OSPF en todos los routers. Esto permitirá que los routers intercambien información sobre las redes conectadas y calculen las mejores rutas hacia destinos remotos dentro del dominio OSPF. Inicialmente, configuraremos todos los routers dentro de una única área OSPF (Área 0, el área backbone), como preparación para la posterior división en áreas requerida en consignas futuras.
+
+#### 3.3.1. Habilitación del Proceso OSPF y Anuncio de Redes
+
+En cada router, se debe iniciar el proceso OSPF y especificar qué redes conectadas directamente participarán en OSPF y serán anunciadas a los vecinos.
+
+El comando principal para iniciar OSPF es `router ospf <process-id>`, donde `<process-id>` es un número localmente significativo (entre 1 y 65535) que identifica la instancia del proceso OSPF en ese router. Se utilizará el ID de proceso `1` en todos los routers por simplicidad.
+
+Luego, se utiliza el comando `network <network-address> <wildcard-mask> area <area-id>` para habilitar OSPF en las interfaces cuyas direcciones IP coincidan con el rango especificado y anunciar la red especificada a otros routers OSPF en la misma área.
+
+La `<wildcard-mask>` es la inversa de la máscara de subred y se usa para determinar qué bits de la dirección IP deben coincidir. Para el `<area-id>`, comenzaremos usando `0` para todos los routers.
+
+**Configuración para R1:**
+```
+Router#conf t
+Enter configuration commands, one per line. End with CNTL/Z.
+Router(config)#router ospf 1
+Router(config-router)#router-id 1.1.1.1  
+Router(config-router)#network 1.1.1.1 0.0.0.0 area 0     
+Router(config-router)#network 192.168.1.0 0.0.0.3 area 0  
+Router(config-router)#network 192.168.6.0 0.0.0.3 area 0  
+Router(config-router)#end
+Router#
+```
+
+Se aplicaron configuraciones análogas en los routers `R2`, `R3`, `R4` y `R5`, asegurándose de incluir todas sus redes conectadas directamente (tanto las redes de host como los enlaces inter-router) dentro del area 0 del proceso ospf 1, utilizando router IDs correspondientes a su nombre (`R2` como `2.2.2.2`, etc.).
+
+#### 3.3.2. Verificación de Vecindades y Proceso OSPF en R2
+
+Una vez configurado OSPF, es crucial verificar que los routers establezcan relaciones de vecindad (estado `FULL`) y que el proceso OSPF general funcione correctamente. Se examinan específicamente las operaciones en R2.
