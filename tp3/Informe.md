@@ -1105,3 +1105,53 @@ OSPF está diseñado para reaccionar automáticamente ante cambios en la topolog
     *   **No hay redundancia** para este enlace de acceso. Es un punto único de falla para la conectividad de esa subred específica.
 
 **Conclusión del Análisis de Fallos:** OSPF demuestra su capacidad de resilencia al redirigir el tráfico automáticamente cuando fallan enlaces redundantes (R2-R1, R2-R3). Sin embargo, la falla de un enlace de acceso (R2-S1) resulta en la pérdida de conectividad para la subred conectada, ya que no existe una ruta alternativa intrínseca en esta topología para ese segmento final, aunque esto es de caracter evidente.
+
+### 3.9. Diferencia entre RIB y FIB
+
+La **Tabla de Información de Enrutamiento (RIB)** y la **Base de Información de Reenvío (FIB)** son dos estructuras de datos cruciales en un router, pero cumplen funciones distintas en los planos de control y de datos, respectivamente.
+
+La **RIB (Routing Information Base)** opera en el plano de control y funciona como la base de datos principal donde el software del router, incluyendo los procesos de enrutamiento como OSPF, junto con rutas estáticas y conectadas, almacena todas las rutas que ha aprendido o que han sido configuradas. Puede contener múltiples rutas candidatas hacia un mismo prefijo de destino, cada una detallada con su métrica, distancia administrativa (AD), siguiente salto e interfaz de salida. El plano de control utiliza la RIB para seleccionar la mejor ruta, priorizando por AD y luego por métrica. Su contenido se inspecciona comúnmente con el comando show ip route.
+
+La **FIB (Forwarding Information Base)** reside en el plano de datos. Es una versión optimizada y simplificada de la RIB, conteniendo únicamente la mejor ruta (o las mejores, en caso de balanceo de carga) para cada prefijo. Su diseño permite búsquedas muy rápidas por parte del hardware o software de reenvío, como Cisco Express Forwarding (CEF). Almacena típicamente el prefijo de destino, la IP del siguiente salto y la interfaz de salida asociada. El plano de datos consulta la FIB para tomar decisiones de reenvío de paquetes de forma inmediata. Se visualiza usando el comando show ip cef, asumiendo que CEF esté habilitado.
+
+#### 3.9.1. Análisis dentro del laboratorio: RIB
+
+<center>
+
+![RIB](img/RIB.png)\
+Figura 3.8. Captura de la obtención de RIB para R3
+
+</center>
+
+Examinando la salida de `show ip route` en R3 (Figura 3.7), observamos la **RIB** en acción. Esta tabla presenta una visión completa de las rutas conocidas por R3. Se listan rutas conectadas directamente (marcadas con `C` y `L`), como `192.168.2.0/30`, y rutas aprendidas a través del protocolo OSPF (marcadas con `O`). Un detalle interesante es la entrada para la red `192.168.1.0/30` (el enlace entre R1 y R2), donde la RIB muestra dos rutas OSPF distintas, una vía `192.168.6.1` (R1) y otra vía `192.168.2.1` (R2), ambas con una métrica idéntica de 2. Esto indica que el plano de control de R3 ha determinado que ambos caminos son igualmente óptimos (Equal Cost Multi-Pathing - ECMP). Para otras redes remotas, como las de los hosts (`172.16.1.0/24`, `172.16.2.0/24`, etc.), la RIB muestra la única ruta que OSPF ha seleccionado como la mejor, cada una con un costo de 2. También se identifica la ruta por defecto (`Gateway of last resort`) que apunta hacia R1.
+
+#### 3.9.2. Análisis dentro del laboratorio: FIB
+
+<center>
+
+![FIB](img/FIB.png)\
+Figura 3.8. Captura de la obtención de FIB mediante CEF para R3
+
+</center>
+
+Al consultar la salida de `show ip cef` en R3 (Figura 3.8), vemos la **FIB**, la cual deriva directamente de las decisiones tomadas en la RIB pero está optimizada para el reenvío. Para la mayoría de los prefijos donde la RIB seleccionó una única mejor ruta (como `172.16.1.0/24` vía `192.168.2.1`, `172.16.2.0/24` vía `192.168.3.2`, o la ruta por defecto vía `192.168.6.1`), la FIB contiene una sola entrada concisa con el prefijo, el siguiente salto y la interfaz. Sin embargo, para el prefijo `192.168.1.0/30`, donde la RIB identificó dos rutas de igual costo, la FIB refleja esta decisión incluyendo **ambas** entradas de siguiente salto (`192.168.6.1` vía `Gi0/1` y `192.168.2.1` vía `Gi0/0`). Esto confirma que la FIB está preparada para ejecutar el balanceo de carga que la RIB determinó como posible. La FIB también contiene entradas para redes directamente conectadas (`attached`) y direcciones IP propias del router (`receive`), esenciales para el proceso de reenvío.
+
+#### 3.9.3. Análisis Concluyente
+Como se puede observar, La RIB es la base de datos completa del plano de control, resultado del aprendizaje de los protocolos de enrutamiento, mientras que la FIB es la tala optimizada del plano de datos, derivada de la RIB, que contiene solo las mejores rutas (posiblemente con balanceo de carga) y se utiliza para el reenvío eficiente de paquetes.
+
+## 4. Conclusión
+### 4.1. Observaciones
+- Para poder realizar este trabajo, se tuvo que emplear el uso de un módulo SFP `HWIC-1GE-SFP` con su respectivo `1000BASE-LX/LH SFP` en los Routers 3 y 5, ya que todos los Routers del emulador solo cuentan con 3 interfaces GigabitEthernet por defecto. De esta forma, se tuvo una interfaz GiE más, utilizando tecnología óptica para el material del cable.
+
+### 4.2. Conclusión General
+  
+La realización de este trabajo práctico permitió consolidar los conocimientos teóricos sobre el enrutamiento dinámico interno, con un enfoque específico en el protocolo OSPF. A través de la simulación en Cisco Packet Tracer, se logró implementar exitosamente una red con múltiples routers y subredes, configurando tanto el direccionamiento IP inicial como el protocolo OSPF en sus variantes de área única y multi-área.
+
+Se verificaron experimentalmente los mecanismos fundamentales de OSPF, incluyendo el descubrimiento de vecinos mediante paquetes Hello, el intercambio de información topológica a través de LSAs (Link State Advertisements), la construcción de la LSDB y el cálculo de rutas óptimas mediante el algoritmo SPF, reflejado en las tablas de enrutamiento. El análisis del ciclo de mensajes durante la re-convergencia proporcionó una visión clara de la dinámica del protocolo.
+
+La implementación multi-área demostró los beneficios de la jerarquía en OSPF para la escalabilidad, observando el rol crucial del ABR en la conexión y sumarización de información entre áreas (mediante LSAs Tipo 3), aunque se detectaron ciertas anomalías en la visualización de las rutas inter-área (O en lugar de O IA) en la tabla de rutas del simulador, a pesar de la correcta funcionalidad del enrutamiento. La manipulación del costo OSPF evidenció su potencial para la ingeniería de tráfico, si bien el resultado práctico en el simulador no reflejó el cambio esperado en la traza de ruta bajo la configuración multi-área probada, sugiriendo posibles limitaciones del entorno de simulación en este escenario específico. La redistribución de una ruta predeterminada funcionó según lo esperado, demostrando cómo integrar OSPF con rutas externas.
+
+Finalmente, el análisis teórico de fallos reafirmó la capacidad de resiliencia de OSPF ante caídas de enlaces redundantes y la distinción práctica entre RIB y FIB clarificó sus roles en los planos de control y datos, respectivamente. 
+
+### 4.3. Resumen Concluyente
+En conjunto, el trabajo práctico ha sido una valiosa experiencia para desarrollar habilidades en la configuración, verificación y análisis de un protocolo de enrutamiento fundamental en redes modernas.
