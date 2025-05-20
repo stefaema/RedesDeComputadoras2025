@@ -159,3 +159,103 @@ Compartición de información sobre qué redes (prefijos IP) son alcanzables y p
     *   **Path Attributes (PAs):** Características de la ruta (ej., `AS_PATH`, `NEXT_HOP`, `ORIGIN`, `LOCAL_PREF`, `MED`).
     *   **Network Layer Reachability Information (NLRI):** Lista de prefijos IP alcanzables a través de la ruta descrita.
 *   **Proceso:** Se envían `UPDATE` solo con cambios (incremental).
+
+##### 3.2.2.4. Tipos de Mensajes BGP
+BGP utiliza cinco tipos principales de mensajes:
+
+1.  **`OPEN` (Tipo 1):** Inicia una sesión BGP y negocia parámetros.
+2.  **`UPDATE` (Tipo 2):** Transfiere información de enrutamiento (anuncia/retira rutas).
+3.  **`NOTIFICATION` (Tipo 3):** Indica un error y cierra la sesión BGP.
+4.  **`KEEPALIVE` (Tipo 4):** Mantiene activa la sesión BGP en ausencia de `UPDATEs`.
+5.  **`ROUTE-REFRESH` (Tipo 5):** (Capacidad Opcional) Permite solicitar reenvío de información de enrutamiento sin reiniciar la sesión.
+
+##### 3.2.2.5. Formato General de Paquetes BGP (Cabecera)
+Todos los mensajes BGP comparten una cabecera común de 19 bytes:
+
+*   **Marker (16 bytes):** Originalmente para autenticación/sincronización. En BGP-4 sobre TCP, usualmente todo a unos (`0xFF...FF`). La autenticación se maneja con opciones TCP (MD5, TCP-AO).
+*   **Length (2 bytes):** Longitud total del mensaje BGP (cabecera + payload), mín. 19, máx. 4096 bytes.
+*   **Type (1 byte):** Tipo de mensaje BGP (1-OPEN, 2-UPDATE, 3-NOTIFICATION, 4-KEEPALIVE, 5-ROUTE-REFRESH).
+
+El payload específico del mensaje sigue a esta cabecera y varía según el `Type`.
+
+#### 3.2.3. Diferencias entre BGP Externo (eBGP) y BGP Interno (iBGP) y Análisis de AS de Tránsito
+El Border Gateway Protocol (BGP) tiene dos variantes principales:
+
+*   **BGP Externo (eBGP):** Se utiliza para el intercambio de información de enrutamiento entre routers de *diferentes* Sistemas Autónomos. En eBGP, el atributo `AS_PATH` se actualiza añadiendo el ASN del AS desde el cual se anuncia la ruta, lo que es crucial para la detección de bucles y la aplicación de políticas. Las sesiones eBGP típicamente se establecen entre routers directamente conectados.
+
+*   **BGP Interno (iBGP):** Se emplea para propagar información de rutas *dentro* de un mismo Sistema Autónomo. Las rutas aprendidas vía eBGP por un router de borde se distribuyen a otros routers dentro del mismo AS mediante iBGP. Una regla fundamental de iBGP es que las rutas aprendidas de un par iBGP no se anuncian a otros pares iBGP (para evitar bucles dentro del AS). Esto implica la necesidad de una topología full-mesh entre routers iBGP, o el uso de mecanismos como *route reflectors* o *confederaciones*. En iBGP, el atributo `AS_PATH` no se modifica.
+
+**Análisis de AS de Tránsito:**
+Considerando un escenario con AS1 (R1), AS2 (R2, R3) y AS3 (R4), donde R1-R2 y R3-R4 son eBGP, y R2-R3 es iBGP (dentro de AS2). Si un paquete se origina en AS1 (destinado a AS3), AS2 actúa como un **AS de tránsito**. Recibe tráfico de AS1 y lo reenvía hacia AS3, utilizando iBGP para comunicar la ruta externa dentro de sus propios routers (R2 a R3).
+
+#### 3.2.4. Análisis de Conexiones eBGP del AS de la Conexión Actual
+Utilizando la herramienta `bgp.he.net`, se analizaron las conexiones del AS `AS7303` (identificado en una de las pruebas de conexión, diferente al `AS11664` mencionado anteriormente, asumimos que esta sección corresponde a otra prueba).
+El AS7303 muestra conexiones eBGP directas con:
+*   AS6762
+*   AS3356
+
+Ambas son conexiones con AS diferentes, constituyendo dos sesiones eBGP.
+
+![Conexiones del AS7303](img/as_red1.png)
+
+#### 3.2.5. Comparativa de Conexiones eBGP en una Red Alternativa
+Al cambiar a otra red (por ejemplo, 4G), se identificó un nuevo AS para la conexión. Una similitud observada con el AS anterior (AS7303) es que ambos pueden tener un número similar de pares eBGP directos o compartir algunos pares comunes, como `AS6762`. Esto puede indicar que `AS6762` es un proveedor de tránsito importante en la región. Las diferencias radicarán en los otros pares eBGP, reflejando las distintas políticas de interconexión del nuevo AS.
+
+![Conexiones de un AS en red alternativa](img/as_red2.png)
+
+#### 3.2.6. Incidente de Enrutamiento BGP: Caso de BGP Hijacking (Cloudflare, junio de 2019)
+El BGP Hijacking (secuestro de rutas) ocurre cuando un AS anuncia prefijos que no le pertenecen, desviando tráfico.
+
+**Incidente de Cloudflare (24 de junio de 2019):**
+Afectó a servicios globales como Cloudflare, Google, Facebook y AWS.
+*   **Origen:** AS37282 (MainOne Cable Company, Nigeria) propagó por error rutas de otros AS, incluyendo prefijos de Cloudflare.
+*   **Amplificación:** China Telecom (AS4134), un proveedor Tier-1, aceptó y retransmitió estas rutas erróneas, magnificando el impacto globalmente.
+
+**Causas Identificadas:**
+*   Configuración incorrecta de anuncios BGP en AS37282.
+*   Ausencia de políticas de filtrado adecuadas en AS4134 (y otros) para validar la legitimidad de los anuncios de ruta.
+*   Falta de implementación generalizada de mecanismos de validación como RPKI (Resource Public Key Infrastructure).
+
+**Consecuencias Observadas:**
+*   Interrupciones parciales en la conectividad de servicios, causando pérdida de paquetes, aumento de latencia y desconexiones.
+*   Riesgo potencial de interceptación de tráfico (ataques Man-in-the-Middle).
+*   Renovado debate sobre la urgencia de implementar medidas de seguridad en BGP (ej., RPKI, BGPsec).
+
+Este incidente subraya la fragilidad del sistema de enrutamiento global ante errores y la necesidad de adoptar prácticas seguras.
+
+### 3.3. Simulación Práctica en Packet Tracer
+
+Se realizó una simulación configurando dos Sistemas Autónomos, AS100 y AS200, interconectados mediante BGP.
+
+**Configuración Inicial y BGP IPv4:**
+
+1.  Se asignaron direcciones IP a los hosts y a las interfaces de los routers (R0 en AS100, R1 en AS200) según la tabla de direccionamiento.
+2.  Se configuró BGP en R0 (AS 100) y R1 (AS 200):
+
+    *   **Router 0 (AS100):**
+        ```routeros
+        enable
+        configure terminal
+        router bgp 100
+        bgp router-id 10.0.0.1
+        neighbor 10.0.0.2 remote-as 200
+        network 192.168.1.0 mask 255.255.255.0
+        end
+        write memory
+        ```
+
+    *   **Router 1 (AS200):**
+        ```routeros
+        enable
+        configure terminal
+        router bgp 200
+        bgp router-id 10.0.0.2
+        neighbor 10.0.0.1 remote-as 100
+        network 192.168.2.0 mask 255.255.255.0
+        end
+        write memory
+        ```
+3.  Se verificó el establecimiento de la adyacencia BGP con `show ip bgp summary` en ambos routers.\
+    ![BGP Summary en Router 1](img/BGPRouter1.png)
+4.  Se probó la conectividad IPv4 entre un host en AS100 (h0: 192.168.1.2) y un host en AS200 (h2: 192.168.2.2) mediante ping, resultando exitoso.\
+    ![Conectividad h0 a h2](img/ConcH0-H2.png)
