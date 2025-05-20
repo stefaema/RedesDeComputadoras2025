@@ -76,3 +76,86 @@ Un **Autonomous System Number (ASN)** es un **identificador numérico único** a
     *   **Representación:** Los ASN de 32 bits se pueden escribir como un número entero simple (ej., `262144`) o en notación "asdot" (ej., `3.65536`, donde el primer número es el valor de los 16 bits superiores y el segundo el de los 16 bits inferiores).
 
 La asignación de ASN públicos requiere una justificación técnica ante el RIR correspondiente, demostrando la necesidad de una política de enrutamiento externa única o interconexión con múltiples AS.
+
+#### 3.1.3. Ejemplos de ASN en Diferentes Entidades
+A continuación, se presentan ejemplos de ASN pertenecientes a diversas organizaciones:
+
+1.  **Empresa (Google LLC):**
+    *   **ASN:** `AS15169`
+    *   **Nombre:** GOOGLE
+    *   **Descripción:** Este es uno de los principales ASN utilizados por Google para su infraestructura global y servicios como búsqueda, YouTube, Google Cloud, etc.
+
+2.  **Universidad (Massachusetts Institute of Technology):**
+    *   **ASN:** `AS3`
+    *   **Nombre:** MIT-GATEWAYS
+    *   **Descripción:** El MIT fue una de las primeras organizaciones en obtener un ASN, por eso tiene un número tan bajo. Lo utiliza para la red de su campus.
+
+3.  **Organización (RIPE NCC - Réseaux IP Européens Network Coordination Centre):**
+    *   **ASN:** `AS3333`
+    *   **Nombre:** RIPE-NCC-AS
+    *   **Descripción:** ASN perteneciente a uno de los Registros Regionales de Internet (RIR), responsable de la asignación de recursos de numeración de Internet (IPs, ASNs) en Europa, Medio Oriente y partes de Asia Central.
+
+#### 3.1.4. Identificación del ASN de la Conexión Actual y Protocolos Soportados
+Para averiguar el ASN de la conexión actual, se utilizó la herramienta en línea proporcionada por `bgp.he.net`.
+
+*   **ASN:** `AS11664`
+*   **Nombre de la Organización:** `Techtel LMDS Comunicaciones Interactivas S.A.`
+*   **País:** `AR - Argentina`
+
+**Protocolos Soportados por el AS:**
+La información sobre qué protocolos específicos soporta un AS (más allá de BGP para interconexión) generalmente se deduce de los prefijos que anuncia y los servicios que ofrece el propietario del AS:
+
+*   **IPv4:** Casi todos los AS del mundo anuncian prefijos IPv4. Esto se puede confirmar buscando los prefijos IPv4 anunciados por el ASN en herramientas como Hurricane Electric BGP Toolkit (`bgp.he.net`).
+*   **IPv6:** La mayoría de los ISPs modernos y grandes organizaciones también anuncian prefijos IPv6. Si el ASN anuncia bloques IPv6, significa que soporta enrutamiento IPv6 en su red troncal.
+*   **Multicast:** El soporte de multicast (para transmitir datos de uno a muchos) es más complejo. BGP puede usarse para transportar información de enrutamiento multicast entre AS (usando extensiones como MBGP), pero el soporte real depende de la implementación de protocolos multicast (como PIM) dentro de su red y acuerdos de peering multicast. Generalmente, se asume soporte básico si el ISP ofrece servicios que lo requieren (como IPTV gestionada).
+
+Para el ASN `AS11664`, la verificación en `bgp.he.net` confirma el anuncio de prefijos IPv4. El soporte para IPv6 y multicast por parte de `Techtel LMDS Comunicaciones Interactivas S.A.` requeriría un análisis más detallado de sus anuncios y servicios.
+
+### 3.2. Border Gateway Protocol (BGP)
+
+#### 3.2.1. Definición de BGP
+El **Border Gateway Protocol (BGP)** es el protocolo de enrutamiento exterior (Exterior Gateway Protocol - EGP) estándar de Internet. Su función principal es **intercambiar información de enrutamiento y alcanzabilidad entre diferentes Sistemas Autónomos (AS)**.
+
+A diferencia de los protocolos de enrutamiento interior (Interior Gateway Protocols - IGPs) como OSPF o IS-IS, que se enfocan en encontrar la ruta más rápida *dentro* de una red única (un AS), BGP se enfoca en determinar las rutas *entre* las grandes redes que componen Internet (los AS).
+
+**Características Clave de BGP:**
+
+1.  **Protocolo de Vector de Rutas (Path Vector):** BGP toma decisiones de enrutamiento basadas en **rutas (paths)**, que son secuencias de números de AS (AS_PATH) por los que debe pasar el tráfico para llegar a un destino. También considera **políticas** definidas por los administradores de red, no solo métricas técnicas como la velocidad o el número de saltos.
+2.  **Fiabilidad:** Utiliza **TCP (Transmission Control Protocol)** como protocolo de transporte en el **puerto 179**. TCP garantiza una entrega ordenada y fiable de los mensajes BGP entre routers vecinos (peers).
+3.  **Escalabilidad:** Está diseñado para manejar la enorme tabla de enrutamiento global de Internet. Utiliza actualizaciones incrementales.
+4.  **Basado en Políticas:** Permite a las organizaciones implementar políticas complejas sobre cómo se anuncia su red y qué rutas prefieren.
+5.  **Tipos de Sesiones:**
+    *   **eBGP (External BGP):** Se establece entre routers en *diferentes* AS.
+    *   **iBGP (Internal BGP):** Se establece entre routers *dentro* del mismo AS para distribuir rutas eBGP aprendidas.
+
+En resumen, BGP es el protocolo que permite que las redes independientes (AS) se comuniquen y dirijan el tráfico globalmente basándose en rutas y políticas.
+
+#### 3.2.2. Funcionamiento de BGP: Procedimientos Funcionales
+El funcionamiento de BGP se puede entender a través de tres procedimientos clave:
+
+##### 3.2.2.1. Adquisición de Vecino (Neighbor Acquisition)
+Este proceso establece una sesión BGP entre dos routers configurados como vecinos.
+*   **Configuración Manual:** Los administradores configuran explícitamente la IP y el AS del vecino.
+*   **Conexión TCP:** Se inicia una conexión TCP al puerto 179 del vecino.
+*   **Intercambio de Mensajes `OPEN`:** Contienen:
+    *   **Versión de BGP:** (Actual: BGP-4).
+    *   **Mi AS (My Autonomous System):** ASN del emisor.
+    *   **Hold Time:** Tiempo máximo sin recibir `KEEPALIVE` o `UPDATE` antes de declarar la conexión caída. Se negocia el mínimo.
+    *   **BGP Identifier:** IP única (usualmente loopback) que identifica al router BGP.
+    *   **Parámetros Opcionales:** Capacidades adicionales (soporte MP-BGP, ASN de 4 bytes, etc.).
+*   **Establecimiento de la Sesión:** Si los parámetros son aceptados, se responde con `KEEPALIVE` y la sesión pasa a **Established**. Errores resultan en `NOTIFICATION` y cierre de conexión.
+
+##### 3.2.2.2. Detección de Vecino Alcanzable (Neighbor Reachability)
+Mecanismo para asegurar que el vecino sigue activo.
+*   **Mensajes `KEEPALIVE`:** Intercambiados periódicamente (típicamente cada tercio del Hold Time).
+*   **Detección de Fallo:** Si no se recibe `KEEPALIVE` o `UPDATE` dentro del Hold Time, se asume fallo.
+*   **Acción ante Fallo:** Sesión BGP y conexión TCP se cierran, rutas aprendidas del vecino se eliminan. Se intenta restablecer la sesión.
+
+##### 3.2.2.3. Detección de Red Alcanzable (Network Reachability)
+Compartición de información sobre qué redes (prefijos IP) son alcanzables y por qué camino.
+*   **Mensajes `UPDATE`:** Intercambian toda la información de rutas. Pueden anunciar nuevas rutas o retirar rutas inválidas.
+*   **Contenido de un Mensaje `UPDATE`:**
+    *   **Withdrawn Routes:** Lista de prefijos IP ya no alcanzables.
+    *   **Path Attributes (PAs):** Características de la ruta (ej., `AS_PATH`, `NEXT_HOP`, `ORIGIN`, `LOCAL_PREF`, `MED`).
+    *   **Network Layer Reachability Information (NLRI):** Lista de prefijos IP alcanzables a través de la ruta descrita.
+*   **Proceso:** Se envían `UPDATE` solo con cambios (incremental).
