@@ -39,6 +39,7 @@
 ---
 
 ## 1. Resumen
+Este trabajo práctico aborda la implementación y evaluación del protocolo de enrutamiento dinámico OSPF (Open Shortest Path First) en un entorno de red simulado. Se inicia con el diseño y configuración de un esquema de direccionamiento IP jerárquico para una topología compuesta por múltiples routers, switches y hosts. Posteriormente, se implementa OSPF, primero en una configuración de área única (Área 0) y luego en una configuración multi-área (Áreas 0 y 1, con un Router de Borde de Área - ABR), verificando en cada etapa la formación de adyacencias, la sincronización de la base de datos de estado de enlace (LSDB) y la correcta población de las tablas de enrutamiento (RIB). Se analiza el ciclo de mensajes OSPF durante la convergencia, se experimenta con la modificación manual de costos para influir en la selección de rutas, y se implementa la redistribución de una ruta estática predeterminada. Adicionalmente, se discute el comportamiento esperado del protocolo ante fallos de enlace y se diferencia conceptual y prácticamente entre la Base de Información de Enrutamiento (RIB) y la Base de Información de Reenvío (FIB). Todo el desarrollo se realiza utilizando el simulador Cisco Packet Tracer, permitiendo la aplicación práctica de los conceptos teóricos de OSPF.
 
 ## 2. Introducción
 
