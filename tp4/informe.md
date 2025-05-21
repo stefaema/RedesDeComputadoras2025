@@ -259,3 +259,60 @@ Se realizó una simulación configurando dos Sistemas Autónomos, AS100 y AS200,
     ![BGP Summary en Router 1](img/BGPRouter1.png)
 4.  Se probó la conectividad IPv4 entre un host en AS100 (h0: 192.168.1.2) y un host en AS200 (h2: 192.168.2.2) mediante ping, resultando exitoso.\
     ![Conectividad h0 a h2](img/ConcH0-H2.png)
+
+    
+**Simulación de Fallo de Enlace/Router:**
+
+Se realizó una prueba de tráfico continuo (`ping -t 192.168.2.2` desde h0) y se deshabilitó R0.
+*   **Observaciones:** La comunicación entre AS100 y AS200 se interrumpió. Los paquetes ICMP de h0 no pudieron ser enrutados más allá de Switch0. En R1, la adyacencia BGP con R0 expiró, y R1 eliminó la ruta hacia 192.168.1.0/24 de su tabla de enrutamiento.
+
+**Configuración IPv6:**
+
+Se procedió a configurar IPv6 en las interfaces de los routers y en los hosts:
+
+*   **Router 0:**
+    *   Gi0/0 (a R1): `2001:DB8:12:1::1/64`
+    *   Gi0/1 (a LAN AS100): `2001:DB8:100:1::1/64`
+*   **Router 1:**
+    *   Gi0/0 (a R0): `2001:DB8:12:1::2/64`
+    *   Gi0/1 (a LAN AS200): `2001:DB8:200:2::1/64`
+*   **Hosts:**
+    *   h0: `2001:DB8:100:1::10/64` (Gateway: `2001:DB8:100:1::1`)
+    *   h1: `2001:DB8:100:1::11/64` (Gateway: `2001:DB8:100:1::1`)
+    *   h2: `2001:DB8:200:2::20/64` (Gateway: `2001:DB8:200:2::1`)
+    *   h3: `2001:DB8:200:2::21/64` (Gateway: `2001:DB8:200:2::1`)
+
+**Desafíos con BGP IPv6 en Packet Tracer:**
+
+La versión de simulación del IOS en Packet Tracer utilizada presentó limitaciones para configurar BGP para la familia de direcciones IPv6 (`address-family ipv6 unicast`).
+
+Esta problemática es de público conocimiento (https://learningnetwork.cisco.com/s/question/0D53i00000Kt6P3CAJ/bgp-with-ipv6-in-packet-tracer).
+
+Por lo tanto, para probar la conectividad IPv6 entre AS, se recurrió a la configuración de rutas estáticas IPv6 entre los routers.
+
+Con rutas estáticas IPv6 configuradas:
+```routeros
+R0(config)# ipv6 route 2001:DB8:200:2::/64 2001:DB8:12:1::2
+R1(config)# ipv6 route 2001:DB8:100:1::/64 2001:DB8:12:1::1
+```
+
+Un `traceroute` desde h0 a h2 (IPv6) indicó que el paquete llegaba a la interfaz WAN de R1. Sin embargo, la simulación del flujo de paquetes en Packet Tracer sugirió un manejo incorrecto posterior en R1, con paquetes que parecían ser reenviados prematuramente o devueltos, indicando una posible anomalía en la simulación o un problema de procesamiento en R1 a pesar de tablas de enrutamiento aparentemente correctas. El tráfico IPv6 end-to-end no se completó satisfactoriamente en este escenario simulado con rutas estáticas inter-AS.
+
+### 3.4. Tabla de Direccionamiento de Red para la Simulación
+
+| Equipo | Interfaz           | IP de Red (Subred IPv4) | IPv4          | Máscara IPv4  | IP de Red (Subred IPv6) | IPv6                | Prefijo IPv6 | Gateway por Defecto (IPv4) | Gateway por Defecto (IPv6) | Comentarios                       |
+| :----- | :----------------- | :---------------------- | :------------ | :------------ | :---------------------- | :------------------ | :----------- | :------------------------- | :------------------------- | :-------------------------------- |
+| **R0** | GigabitEthernet0/0 | 10.0.0.0/24             | 10.0.0.1      | 255.255.255.0 | 2001:DB8:12:1::/64      | 2001:DB8:12:1::1    | /64          | N/A                        | N/A                        | Interfaz WAN a R1 (AS200)         |
+| **R0** | GigabitEthernet0/1 | 192.168.1.0/24          | 192.168.1.1   | 255.255.255.0 | 2001:DB8:100:1::/64     | 2001:DB8:100:1::1   | /64          | N/A                        | N/A                        | Interfaz LAN para AS100           |
+| **R1** | GigabitEthernet0/0 | 10.0.0.0/24             | 10.0.0.2      | 255.255.255.0 | 2001:DB8:12:1::/64      | 2001:DB8:12:1::2    | /64          | N/A                        | N/A                        | Interfaz WAN a R0 (AS100)         |
+| **R1** | GigabitEthernet0/1 | 192.168.2.0/24          | 192.168.2.1   | 255.255.255.0 | 2001:DB8:200:2::/64     | 2001:DB8:200:2::1   | /64          | N/A                        | N/A                        | Interfaz LAN para AS200           |
+| **h0** | FastEthernet0      | 192.168.1.0/24          | 192.168.1.2   | 255.255.255.0 | 2001:DB8:100:1::/64     | 2001:DB8:100:1::10  | /64          | 192.168.1.1                | 2001:DB8:100:1::1          | Host en AS100                     |
+| **h1** | FastEthernet0      | 192.168.1.0/24          | 192.168.1.3   | 255.255.255.0 | 2001:DB8:100:1::/64     | 2001:DB8:100:1::11  | /64          | 192.168.1.1                | 2001:DB8:100:1::1          | Host en AS100                     |
+| **h2** | FastEthernet0      | 192.168.2.0/24          | 192.168.2.2   | 255.255.255.0 | 2001:DB8:200:2::/64     | 2001:DB8:200:2::20  | /64          | 192.168.2.1                | 2001:DB8:200:2::1          | Host en AS200                     |
+| **h3** | FastEthernet0      | 192.168.2.0/24          | 192.168.2.3   | 255.255.255.0 | 2001:DB8:200:2::/64     | 2001:DB8:200:2::21  | /64          | 192.168.2.1                | 2001:DB8:200:2::1          | Host en AS200                     |
+
+### 3.5. Agregado de Dispositivos y Configuración de Enrutamiento Interno
+
+En esta sección, se procede a expandir la topología de red del Sistema Autónomo AS100. Se incorporará un nuevo router (Router2), un switch adicional y una nueva estación de trabajo (PC4). La disposición física de estos nuevos componentes se ilustra a continuación:
+
+![Red Ampliada](img/RedExtendida.png)
