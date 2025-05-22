@@ -48,6 +48,9 @@ Un **Sistema Autónomo (Autonomous System - AS)** es un conjunto de redes IP (bl
 
 **Características Clave:**
 
+En esencia, Internet está compuesto por una vasta red de Sistemas Autónomos interconectados que intercambian información de alcance (reachability) usando BGP. Esto se evidencia debido a que esta  tecnología presenta características como las siguientes:
+
+
 *   **Administración Única:** Una sola organización (como un proveedor de servicios de Internet (ISP), una gran empresa, una universidad o una agencia gubernamental) es responsable de la gestión y operación del AS.
 *   **Política de Enrutamiento Común:** Todas las redes dentro del AS comparten y siguen las mismas reglas sobre cómo se enruta el tráfico hacia y desde otras redes externas (otros AS).
 *   **Identificación Única:** Cada AS se identifica globalmente mediante un número único llamado ASN (Autonomous System Number).
@@ -55,10 +58,12 @@ Un **Sistema Autónomo (Autonomous System - AS)** es un conjunto de redes IP (bl
     *   **Internamente (Intra-AS):** Utilizan un Protocolo de Gateway Interior (IGP) como OSPF (Open Shortest Path First) o IS-IS (Intermediate System to Intermediate System) para intercambiar información de enrutamiento *dentro* del propio AS.
     *   **Externamente (Inter-AS):** Utilizan un Protocolo de Gateway Exterior (EGP), siendo **BGP (Border Gateway Protocol)** el estándar de facto en Internet, para intercambiar información de enrutamiento *entre* diferentes AS.
 
-En esencia, Internet está compuesto por una vasta red de Sistemas Autónomos interconectados que intercambian información de alcance (reachability) usando BGP.
+
 
 #### 3.1.2. El Número de Sistema Autónomo (ASN)
 Un **Autonomous System Number (ASN)** es un **identificador numérico único** asignado a cada Sistema Autónomo. Es utilizado principalmente por el protocolo BGP para identificar de forma única a cada red en Internet y para aplicar políticas de enrutamiento entre ellas.
+
+La asignación de ASN públicos requiere una justificación técnica ante el RIR correspondiente, demostrando la necesidad de una política de enrutamiento externa única o interconexión con múltiples AS.
 
 **Conformación y Tipos:**
 
@@ -75,7 +80,7 @@ Un **Autonomous System Number (ASN)** es un **identificador numérico único** a
     *   **Rango Privado:** 4200000000 a 4294967294.
     *   **Representación:** Los ASN de 32 bits se pueden escribir como un número entero simple (ej., `262144`) o en notación "asdot" (ej., `3.65536`, donde el primer número es el valor de los 16 bits superiores y el segundo el de los 16 bits inferiores).
 
-La asignación de ASN públicos requiere una justificación técnica ante el RIR correspondiente, demostrando la necesidad de una política de enrutamiento externa única o interconexión con múltiples AS.
+
 
 #### 3.1.3. Ejemplos de ASN en Diferentes Entidades
 A continuación, se presentan ejemplos de ASN pertenecientes a diversas organizaciones:
@@ -120,6 +125,8 @@ A diferencia de los protocolos de enrutamiento interior (Interior Gateway Protoc
 
 **Características Clave de BGP:**
 
+BGP es el protocolo que permite que las redes independientes (AS) se comuniquen y dirijan el tráfico globalmente basándose en rutas y políticas, y presenta las siguientes características:
+
 1.  **Protocolo de Vector de Rutas (Path Vector):** BGP toma decisiones de enrutamiento basadas en **rutas (paths)**, que son secuencias de números de AS (AS_PATH) por los que debe pasar el tráfico para llegar a un destino. También considera **políticas** definidas por los administradores de red, no solo métricas técnicas como la velocidad o el número de saltos.
 2.  **Fiabilidad:** Utiliza **TCP (Transmission Control Protocol)** como protocolo de transporte en el **puerto 179**. TCP garantiza una entrega ordenada y fiable de los mensajes BGP entre routers vecinos (peers).
 3.  **Escalabilidad:** Está diseñado para manejar la enorme tabla de enrutamiento global de Internet. Utiliza actualizaciones incrementales.
@@ -128,7 +135,6 @@ A diferencia de los protocolos de enrutamiento interior (Interior Gateway Protoc
     *   **eBGP (External BGP):** Se establece entre routers en *diferentes* AS.
     *   **iBGP (Internal BGP):** Se establece entre routers *dentro* del mismo AS para distribuir rutas eBGP aprendidas.
 
-En resumen, BGP es el protocolo que permite que las redes independientes (AS) se comuniquen y dirijan el tráfico globalmente basándose en rutas y políticas.
 
 #### 3.2.2. Funcionamiento de BGP: Procedimientos Funcionales
 El funcionamiento de BGP se puede entender a través de tres procedimientos clave:
@@ -170,13 +176,12 @@ BGP utiliza cinco tipos principales de mensajes:
 5.  **`ROUTE-REFRESH` (Tipo 5):** (Capacidad Opcional) Permite solicitar reenvío de información de enrutamiento sin reiniciar la sesión.
 
 ##### 3.2.2.5. Formato General de Paquetes BGP (Cabecera)
-Todos los mensajes BGP comparten una cabecera común de 19 bytes:
+Todos los mensajes BGP comparten una cabecera común de 19 bytes, donde el payload específico asociado al mensaje seguira a esta cabecera y variará segu el `Type`:
 
 *   **Marker (16 bytes):** Originalmente para autenticación/sincronización. En BGP-4 sobre TCP, usualmente todo a unos (`0xFF...FF`). La autenticación se maneja con opciones TCP (MD5, TCP-AO).
 *   **Length (2 bytes):** Longitud total del mensaje BGP (cabecera + payload), mín. 19, máx. 4096 bytes.
 *   **Type (1 byte):** Tipo de mensaje BGP (1-OPEN, 2-UPDATE, 3-NOTIFICATION, 4-KEEPALIVE, 5-ROUTE-REFRESH).
 
-El payload específico del mensaje sigue a esta cabecera y varía según el `Type`.
 
 #### 3.2.3. Diferencias entre BGP Externo (eBGP) y BGP Interno (iBGP) y Análisis de AS de Tránsito
 El Border Gateway Protocol (BGP) tiene dos variantes principales:
@@ -209,19 +214,18 @@ El BGP Hijacking (secuestro de rutas) ocurre cuando un AS anuncia prefijos que n
 **Incidente de Cloudflare (24 de junio de 2019):**
 Afectó a servicios globales como Cloudflare, Google, Facebook y AWS.
 *   **Origen:** AS37282 (MainOne Cable Company, Nigeria) propagó por error rutas de otros AS, incluyendo prefijos de Cloudflare.
-*   **Amplificación:** China Telecom (AS4134), un proveedor Tier-1, aceptó y retransmitió estas rutas erróneas, magnificando el impacto globalmente.
+*   **Agravante:** China Telecom (AS4134), un proveedor Tier-1, aceptó y retransmitió estas rutas erróneas, magnificando el impacto globalmente.
 
 **Causas Identificadas:**
-*   Configuración incorrecta de anuncios BGP en AS37282.
+*   Hubo configuración incorrecta de los anuncios BGP en AS37282.
 *   Ausencia de políticas de filtrado adecuadas en AS4134 (y otros) para validar la legitimidad de los anuncios de ruta.
-*   Falta de implementación generalizada de mecanismos de validación como RPKI (Resource Public Key Infrastructure).
+*   Falta de implementación generalizada de mecanismos de validación, como RPKI (Resource Public Key Infrastructure).
 
 **Consecuencias Observadas:**
 *   Interrupciones parciales en la conectividad de servicios, causando pérdida de paquetes, aumento de latencia y desconexiones.
 *   Riesgo potencial de interceptación de tráfico (ataques Man-in-the-Middle).
 *   Renovado debate sobre la urgencia de implementar medidas de seguridad en BGP (ej., RPKI, BGPsec).
 
-Este incidente subraya la fragilidad del sistema de enrutamiento global ante errores y la necesidad de adoptar prácticas seguras.
 
 ### 3.3. Simulación Práctica en Packet Tracer
 
