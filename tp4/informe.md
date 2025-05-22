@@ -316,3 +316,70 @@ Un `traceroute` desde h0 a h2 (IPv6) indicó que el paquete llegaba a la interfa
 En esta sección, se procede a expandir la topología de red del Sistema Autónomo AS100. Se incorporará un nuevo router (Router2), un switch adicional y una nueva estación de trabajo (PC4). La disposición física de estos nuevos componentes se ilustra a continuación:
 
 ![Red Ampliada](img/RedExtendida.png)
+
+### 3.5.1. Configuración de OSPF para Enrutamiento Intra-AS
+Para asegurar la conectividad interna completa dentro de AS100, permitiendo que todos los dispositivos alcancen todas las subredes internas, se configurará el protocolo de enrutamiento OSPF (Open Shortest Path First) en Router0 y Router2. Se utilizará el proceso OSPF ID 1 y el área 0 (área de backbone).
+
+*   **Configuración en Router0:**
+    Se anuncian tanto la red LAN original (`192.168.1.0/24`) como la nueva red de interconexión con Router2 (`192.168.3.0/24`).
+
+    ```routeros
+    Router0(config)# router ospf 1
+    Router0(config-router)# router-id 0.0.0.1
+    Router0(config-router)# network 192.168.1.0 0.0.0.255 area 0
+    Router0(config-router)# network 192.168.3.0 0.0.0.255 area 0
+    Router0(config-router)# end
+    ```
+
+*   **Configuración en Router2:**
+    Se anuncian la nueva red LAN (`192.168.4.0/24`) y la red de interconexión con Router0 (`192.168.3.0/24`).
+
+    ```routeros
+    Router2(config)# router ospf 1
+    Router2(config-router)# router-id 0.0.0.2
+    Router2(config-router)# network 192.168.4.0 0.0.0.255 area 0
+    Router2(config-router)# network 192.168.3.0 0.0.0.255 area 0
+    Router2(config-router)# end
+    ```
+
+Una vez aplicada la configuración OSPF, se verifica la conectividad interna dentro de AS100 mediante un ping entre PC0 (en la red `192.168.1.0/24`) y PC4 (en la red `192.168.4.0/24`).
+
+![Ping entre PC0 y PC4 dentro de AS100](img/PC4aPC0.png)
+
+La imagen confirma que la comunicación entre PC4 y PC0 es exitosa, indicando que OSPF ha establecido correctamente las rutas internas en AS100.
+
+### 3.5.2. Redistribución de Rutas OSPF en BGP
+Para que el Sistema Autónomo AS200 pueda conocer y alcanzar la nueva subred es necesario que Router0 anuncie esta red a Router1 (en AS200) a través de BGP. Dado que Router0 aprendió la ruta hacia `192.168.4.0/24` mediante OSPF, se debe realizar una redistribución de las rutas OSPF en el proceso BGP de Router0.
+
+Los siguientes comandos se ejecutan en Router0:
+
+```routeros
+Router0> enable
+Router0# configure terminal
+Router0(config)# router bgp 100
+Router0(config-router)# redistribute ospf 1
+Router0(config-router)# end
+```
+
+Tras la redistribución, se puede verificar la tabla BGP en Router0 con `show ip bgp`. En Router1 (AS200), la misma red debería aparecer con `10.0.0.1` (IP de Router0) como next-hop.
+
+### 3.5.3. Prueba de Conectividad Inter-AS
+Con las rutas OSPF redistribuidas en BGP, se procede a verificar la conectividad desde un host en AS200 (PC2) hacia el nuevo host en AS100 (PC4).
+
+![Ping desde PC2 (AS200) hacia PC4 (AS100)](img/PC2aPC4.png)
+
+Como se observa en la captura, el ping es exitoso. Esto demuestra que Router1 (AS200) ha aprendido la ruta hacia la red a través de BGP, gracias a la redistribución configurada en Router0 (AS100).
+
+## 4. Conclusión
+
+La fase práctica de este trabajo, desarrollada a través de la simulación en Packet Tracer, ha sido fundamental para consolidar los conceptos teóricos del enrutamiento inter-AS con BGP y la interacción con protocolos de enrutamiento intra-AS como OSPF.
+
+Inicialmente, se estableció con éxito una comunicación básica entre dos Sistemas Autónomos (AS100 y AS200) mediante la configuración de eBGP para IPv4. Esta etapa permitió verificar el intercambio de información de alcanzabilidad y la correcta formación de adyacencias BGP, así como observar la respuesta del protocolo ante fallos simulados en la red. Si bien se exploró la configuración de direccionamiento IPv6, las limitaciones de la herramienta de simulación para la implementación completa de BGP para esta familia de direcciones dirigieron el enfoque hacia el uso de rutas estáticas para demostrar la conectividad IPv6 inter-AS.
+
+Posteriormente, el trabajo se centró en la expansión de la infraestructura interna de AS100. La introducción de un nuevo router, switch y host, junto con la implementación de OSPF como protocolo de gateway interior (IGP), demostró la capacidad de establecer y verificar la conectividad completa dentro de un mismo Sistema Autónomo. Este paso fue crucial para preparar el escenario para un concepto más avanzado: la interacción entre el IGP y el EGP.
+
+El hito principal de esta fase extendida fue la configuración de la redistribución de rutas OSPF en el proceso BGP del router de borde (Router0). Este procedimiento es esencial en redes reales para anunciar las redes internas de un AS al mundo exterior. Las pruebas de conectividad subsiguientes, que permitieron a un host en AS200 alcanzar la nueva red interna de AS100 (previamente conocida solo vía OSPF), validaron de manera concluyente el éxito de la redistribución.
+
+Estos ejercicios prácticos han subrayado la importancia de una configuración meticulosa tanto de BGP como de los IGPs, y cómo la redistribución de rutas actúa como un puente vital entre estos dos mundos del enrutamiento. La capacidad de verificar cada paso mediante comandos como `show ip bgp summary`, `show ip route`, y pruebas de `ping`, reforzó la comprensión del flujo de información y la toma de decisiones de los routers.
+
+En resumen, esta sección práctica del trabajo no solo ha permitido aplicar los conocimientos teóricos sobre BGP y OSPF, sino también comprender de manera tangible cómo las redes se interconectan y cómo la información de enrutamiento se propaga y se gestiona a través de diferentes dominios de enrutamiento para lograr la conectividad global o interdepartamental.
