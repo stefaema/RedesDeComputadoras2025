@@ -116,3 +116,117 @@ Esto confirma que los paquetes transitaron correctamente y que la carga útil fu
 #### 3.1.3 Registro de Paquetes con Timestamp (Punto 1b)
 
 Ambos scripts implementaron una función `log_message` para registrar los eventos de envío y recepción en archivos de texto. El `tcp_client_log.txt` almacenó cada paquete enviado y cada ACK recibido, incluyendo el timestamp exacto y la latencia calculada para cada par paquete/ACK. El `tcp_server_log.txt` registró cada paquete recibido con su respectivo timestamp y contenido.
+
+A continuación, se muestra un extracto del archivo `tcp_client_log.txt`:
+
+```
+Timestamp,Direction,MessageID,Data,Latency(s)
+1748567731.845952,SENT,NoLoSonIEEE-1,Este es el payload del paquete TCP 1,
+1748567731.847887,ACK_RECEIVED,ACK_FOR_NoLoSonIEEE-1,,0.001935
+1748567732.848438,SENT,NoLoSonIEEE-2,Este es el payload del paquete TCP 2,
+1748567732.870101,ACK_RECEIVED,ACK_FOR_NoLoSonIEEE-2,,0.021663
+1748567733.871089,SENT,NoLoSonIEEE-3,Este es el payload del paquete TCP 3,
+1748567733.893876,ACK_RECEIVED,ACK_FOR_NoLoSonIEEE-3,,0.022787
+1748567734.894459,SENT,NoLoSonIEEE-4,Este es el payload del paquete TCP 4,
+1748567734.919055,ACK_RECEIVED,ACK_FOR_NoLoSonIEEE-4,,0.024596
+1748567735.919981,SENT,NoLoSonIEEE-5,Este es el payload del paquete TCP 5,
+1748567735.941965,ACK_RECEIVED,ACK_FOR_NoLoSonIEEE-5,,0.021983
+1748567736.942663,SENT,NoLoSonIEEE-6,Este es el payload del paquete TCP 6,
+1748567736.965894,ACK_RECEIVED,ACK_FOR_NoLoSonIEEE-6,,0.023231
+1748567737.966908,SENT,NoLoSonIEEE-7,Este es el payload del paquete TCP 7,
+1748567737.989587,ACK_RECEIVED,ACK_FOR_NoLoSonIEEE-7,,0.022679
+1748567738.990126,SENT,NoLoSonIEEE-8,Este es el payload del paquete TCP 8,
+1748567739.013825,ACK_RECEIVED,ACK_FOR_NoLoSonIEEE-8,,0.023699
+1748567740.014421,SENT,NoLoSonIEEE-9,Este es el payload del paquete TCP 9,
+1748567740.038053,ACK_RECEIVED,ACK_FOR_NoLoSonIEEE-9,,0.023632
+1748567741.038563,SENT,NoLoSonIEEE-10,Este es el payload del paquete TCP 10,
+1748567741.063805,ACK_RECEIVED,ACK_FOR_NoLoSonIEEE-10,,0.025242
+```
+
+Y un extracto del `tcp_server_log.txt`:
+
+```
+Timestamp,Direction,MessageID,Data
+1748567731.240975,RECEIVED,NoLoSonIEEE-1,Este es el payload del paquete TCP 1
+1748567732.262774,RECEIVED,NoLoSonIEEE-2,Este es el payload del paquete TCP 2
+1748567733.287052,RECEIVED,NoLoSonIEEE-3,Este es el payload del paquete TCP 3
+1748567734.311216,RECEIVED,NoLoSonIEEE-4,Este es el payload del paquete TCP 4
+1748567735.335325,RECEIVED,NoLoSonIEEE-5,Este es el payload del paquete TCP 5
+1748567736.359185,RECEIVED,NoLoSonIEEE-6,Este es el payload del paquete TCP 6
+1748567737.383105,RECEIVED,NoLoSonIEEE-7,Este es el payload del paquete TCP 7
+1748567738.406848,RECEIVED,NoLoSonIEEE-8,Este es el payload del paquete TCP 8
+1748567739.431267,RECEIVED,NoLoSonIEEE-9,Este es el payload del paquete TCP 9
+1748567740.455866,RECEIVED,NoLoSonIEEE-10,Este es el payload del paquete TCP 10
+```
+
+Estos logs permitieron una trazabilidad detallada de la comunicación. 
+
+#### 3.1.4 Cálculo de Métricas de Conexión (Punto 1c)
+
+Utilizando los timestamps registrados para el envío de cada paquete y la recepción de su correspondiente ACK, el script `tcp_client.py` calculó una serie de métricas clave para la secuencia de 100 paquetes enviados. Estas métricas ofrecen una visión cuantitativa del rendimiento de la comunicación TCP en el entorno de prueba configurado. A continuación, se detallan las métricas obtenidas, su significado, la fórmula matemática empleada para su cálculo y su correspondencia con el código Python implementado.
+
+*   **Latencia Promedio (Average Latency):**
+    Representa el Tiempo de Ida y Vuelta (RTT) promedio para los paquetes de la prueba. Es un indicador general de cuán rápido es el enlace de comunicación. Un valor más bajo indica una mejor respuesta de la red.
+    *   **Fórmula Matemática:**
+        $\text{Latencia Promedio} = \frac{\sum_{i=1}^{N} \text{Latencia}_i}{N}$
+        Donde $Latencia_i$ es la latencia individual del paquete $i$ (tiempo de recepción del ACK - tiempo de envío del paquete), y $N$ es el número total de latencias registradas.
+    *   **Paralelismo con el Código:** En el script `tcp_client.py`, dentro de la función `calculate_metrics`, esta métrica se calcula utilizando `statistics.mean(latencies)`, donde `latencies` es una lista que contiene todas las latencias individuales (`ack_receive_timestamp - send_timestamp`) recolectadas durante la prueba.
+
+*   **Latencia Máxima (Maximum Latency):**
+    Indica el valor más alto de RTT observado durante toda la prueba. Esta métrica es útil para entender el peor caso de retardo que un paquete experimentó, lo cual puede ser crítico para aplicaciones sensibles al tiempo.
+    *   **Fórmula Matemática:**
+        $\text{Latencia Máxima} = \max(\text{Latencia}_1, \text{Latencia}_2, \dots, \text{Latencia}_N)$
+    *   **Paralelismo con el Código:** Se calcula mediante `max(latencies)` en la función `calculate_metrics`.
+
+*   **Latencia Mínima (Minimum Latency):**
+    Refleja el valor más bajo de RTT observado. Representa el mejor caso de retardo, a menudo limitado por la velocidad de propagación física y el overhead mínimo de procesamiento.
+    *   **Fórmula Matemática:**
+        $\text{Latencia Mínima} = \min(\text{Latencia}_1, \text{Latencia}_2, \dots, \text{Latencia}_N)$
+    *   **Paralelismo con el Código:** Se obtiene con `min(latencies)` en la función `calculate_metrics`.
+
+*   **Jitter Promedio (Average Jitter):**
+    El jitter mide la variación en el retardo (latencia) de los paquetes sucesivos. Un jitter alto puede ser problemático para aplicaciones de streaming de audio/video o VoIP, ya que implica una llegada irregular de los paquetes.
+    *   **Fórmula Matemática:**
+        Primero, se calcula el jitter individual entre paquetes consecutivos `i` e `i-1`:
+        $\text{Jitter}_i = |\text{Latencia}_i - \text{Latencia}_{i-1}|$
+        Luego, el jitter promedio se calcula como la media de estos jitters individuales:
+        $\text{Jitter Promedio} = \frac{\sum_{k=1}^{M} \text{Jitter}_k}{M}$
+        Donde $M$ es el número de valores de jitter calculados (que sería $N-1$ si $N$ es el número de latencias).
+    *   **Paralelismo con el Código:** En `calculate_metrics`, primero se genera una lista de jitters individuales: `jitters = [abs(latencies[i] - latencies[i-1]) for i in range(1, len(latencies))]`. Posteriormente, se calcula el promedio de esta lista con `statistics.mean(jitters)`.
+
+Las métricas obtenidas para TCP fueron:
+*   **Latencia Promedio:** `24.05 ms`
+*   **Latencia Máxima:** `128.79 ms`
+*   **Latencia Mínima:** `1.93 ms`
+*   **Jitter Promedio:** `10.58 ms`
+
+Estas métricas reflejan el comportamiento de la comunicación TCP en la red local bajo las condiciones de la prueba.
+
+### 3.2 Envío de datos mediante UDP
+
+Siguiendo una metodología similar a la empleada para TCP, se procedió a desarrollar y probar la comunicación utilizando el Protocolo de Datagramas de Usuario (UDP). Para ello, se crearon los scripts `udp_server.py` y `udp_client.py`, manteniendo el mismo entorno de prueba: el servidor UDP en la máquina Windows y el cliente UDP en la máquina Linux Mint. El puerto UDP designado para esta comunicación fue el `12346`, configurado en los respectivos archivos `config_server.py` y `config_client.py`.
+
+#### 3.2.1 Funcionalidad y Estructura de los Scripts UDP
+
+El protocolo UDP, al ser no orientado a conexión y no garantizar la entrega, presenta diferencias fundamentales con TCP que se reflejaron en el diseño de los scripts:
+
+El script `udp_server.py` fue implementado para:
+1.  Crear un socket UDP.
+2.  Vincular el socket a la dirección IP del servidor y el puerto UDP especificado.
+3.  Entrar en un bucle para recibir datagramas UDP. Esta función también proporciona la dirección IP y el puerto del remitente.
+4.  Al recibir un datagrama, decodificar su contenido, registrar el evento en `logs/udp_server_log.txt` y enviar un ACK UDP al remitente utilizando la dirección obtenida.
+5.  El servidor fue diseñado para terminar su ejecución tras recibir una señal de "finalización de métricas" por parte del cliente.
+
+El script `udp_client.py` se desarrolló con las siguientes capacidades:
+1.  Crear un socket UDP.
+2.  Definir la dirección del servidor a la cual se enviarán los datagramas.
+3.  Implementar un timeout en el socket para las operaciones de recepción, permitiendo así detectar la posible pérdida de ACKs.
+4.  Enviar una secuencia de `N` datagramas al servidor, con identificador y carga útil similar a la prueba TCP.
+5.  Después de enviar cada datagrama con `sendto()`, esperar un ACK del servidor utilizando `recvfrom()`.
+6.  Registrar los envíos, ACKs recibidos o timeouts en `logs/udp_client_log.txt`.
+7.  Calcular métricas de rendimiento basadas en los ACKs recibidos y estimar el porcentaje de pérdida de paquetes.
+8.  Al finalizar el envío de paquetes de métricas, enviar un mensaje de control al servidor para indicar el fin de la prueba.
+
+#### 3.2.2 Pruebas, Captura de Tráfico e Identificación de Carga Útil (Punto 2a)
+
+Se ejecutaron los scripts UDP, y se utilizó Wireshark en la máquina servidor para capturar el tráfico, esta vez con el filtro de visualización `udp.port == 12346`. A diferencia de TCP, no se observa un handshake de establecimiento de conexión, ya que UDP es un protocolo sin conexión. Los paquetes de datos comenzaron a fluir directamente entre el cliente (Linux, IP: `192.168.100.36`) y el servidor (Windows, IP: `192.168.100.2`).
