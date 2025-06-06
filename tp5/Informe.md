@@ -230,3 +230,133 @@ El script `udp_client.py` se desarrolló con las siguientes capacidades:
 #### 3.2.2 Pruebas, Captura de Tráfico e Identificación de Carga Útil (Punto 2a)
 
 Se ejecutaron los scripts UDP, y se utilizó Wireshark en la máquina servidor para capturar el tráfico, esta vez con el filtro de visualización `udp.port == 12346`. A diferencia de TCP, no se observa un handshake de establecimiento de conexión, ya que UDP es un protocolo sin conexión. Los paquetes de datos comenzaron a fluir directamente entre el cliente (Linux, IP: `192.168.100.36`) y el servidor (Windows, IP: `192.168.100.2`).
+
+<center>
+
+![Lista de Paquetes UDP](<img/Paquetes UDP.png>)
+
+*Figura 3.3. Inspección Wireshark de paquetes.*
+
+</center>
+
+Al analizar los detalles del datagrama UDP seleccionado, se expandió la sección de datos. La carga útil, con el formato "NoLoSonIEEE-X:Este es el payload del paquete UDP X", fue visible en texto plano, como se muestra en la Figura 3.4.
+
+<center>
+
+![Payload UDP Legible](<img/Data UDP.png>)
+
+*Figura 3.4. Inspección de un paquete UDP enviado.*
+
+</center>
+
+
+
+| Hex | 4e | 6f | 4c | 6f | 53 | 6f | 6e | 49 | 45 | 45 | 2d | 31 | 3a | 45 | 73 | 74 | 65 | 20 | 65 | 73 | 20 | 65 | 6c | 20 | 70 | 61 | 79 | 6c | 6f | 61 | 64 | 20 | 64 | 65 | 6c | 20 | 70 | 61 | 71 | 75 | 65 | 74 | 65 | 20 | 55 | 44 | 50 | 20 | 31 |
+|:---:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+| Char| N  | o  | L  | o  | S  | o  | n  | I  | E  | E  | -  | 1  | :  | E  | s  | t  | e  |    | e  | s  |    | e  | l  |    | p  | a  | y  | l  | o  | a  | d  |    | d  | e  | l  |    | p  | a  | q  | u  | e  | t  | e  |    | U  | D  | P  |    | 1  |
+
+<center>
+
+*Tabla 3.2: Mapeo de Bytes Hexadecimales a Caracteres para Paquete UDP (Figura 3.4)*
+
+</center>
+
+Esto confirma la correcta transmisión e identificación del payload para UDP.
+
+#### 3.2.3 Registro de Paquetes con Timestamp (Punto 2b)
+
+De manera análoga a TCP, los scripts UDP registraron los eventos de comunicación. El archivo `udp_client_log.txt` documentó cada datagrama enviado, los ACKs recibidos (con su latencia) o los timeouts si el ACK no llegó. El `udp_server_log.txt` guardó cada datagrama recibido, su contenido y la dirección del cliente.
+
+Extracto del `udp_client_log.txt`:
+
+```
+Timestamp,Direction,MessageID,Data,Latency(s)
+1748568037.222008,SENT,NoLoSonIEEE-1,Este es el payload del paquete UDP 1,
+1748568037.276524,ACK_RECEIVED,ACK_UDP_FOR_NoLoSonIEEE-1,,0.054516
+1748568038.278185,SENT,NoLoSonIEEE-2,Este es el payload del paquete UDP 2,
+1748568038.295967,ACK_RECEIVED,ACK_UDP_FOR_NoLoSonIEEE-2,,0.017782
+1748568039.297701,SENT,NoLoSonIEEE-3,Este es el payload del paquete UDP 3,
+1748568039.313160,ACK_RECEIVED,ACK_UDP_FOR_NoLoSonIEEE-3,,0.015459
+1748568040.314893,SENT,NoLoSonIEEE-4,Este es el payload del paquete UDP 4,
+1748568040.318333,ACK_RECEIVED,ACK_UDP_FOR_NoLoSonIEEE-4,,0.003439
+1748568041.319689,SENT,NoLoSonIEEE-5,Este es el payload del paquete UDP 5,
+1748568041.361693,ACK_RECEIVED,ACK_UDP_FOR_NoLoSonIEEE-5,,0.042004
+1748568042.363651,SENT,NoLoSonIEEE-6,Este es el payload del paquete UDP 6,
+1748568042.367851,ACK_RECEIVED,ACK_UDP_FOR_NoLoSonIEEE-6,,0.004200
+1748568043.369331,SENT,NoLoSonIEEE-7,Este es el payload del paquete UDP 7,
+1748568043.410073,ACK_RECEIVED,ACK_UDP_FOR_NoLoSonIEEE-7,,0.040742
+1748568044.412118,SENT,NoLoSonIEEE-8,Este es el payload del paquete UDP 8,
+1748568044.436735,ACK_RECEIVED,ACK_UDP_FOR_NoLoSonIEEE-8,,0.024618
+1748568045.438972,SENT,NoLoSonIEEE-9,Este es el payload del paquete UDP 9,
+1748568045.458177,ACK_RECEIVED,ACK_UDP_FOR_NoLoSonIEEE-9,,0.019204
+1748568046.460001,SENT,NoLoSonIEEE-10,Este es el payload del paquete UDP 10,
+1748568046.482211,ACK_RECEIVED,ACK_UDP_FOR_NoLoSonIEEE-10,,0.022210
+```
+
+Extracto del `udp_server_log.txt`:
+
+```
+Timestamp,Direction,MessageID,Data,ClientAddr
+1748568036.607179,RECEIVED,NoLoSonIEEE-1,Este es el payload del paquete UDP 1,('192.168.100.36', 42360)
+1748568037.629307,RECEIVED,NoLoSonIEEE-2,Este es el payload del paquete UDP 2,('192.168.100.36', 42360)
+1748568038.647360,RECEIVED,NoLoSonIEEE-3,Este es el payload del paquete UDP 3,('192.168.100.36', 42360)
+1748568039.651402,RECEIVED,NoLoSonIEEE-4,Este es el payload del paquete UDP 4,('192.168.100.36', 42360)
+1748568040.695063,RECEIVED,NoLoSonIEEE-5,Este es el payload del paquete UDP 5,('192.168.100.36', 42360)
+1748568041.701137,RECEIVED,NoLoSonIEEE-6,Este es el payload del paquete UDP 6,('192.168.100.36', 42360)
+1748568042.743018,RECEIVED,NoLoSonIEEE-7,Este es el payload del paquete UDP 7,('192.168.100.36', 42360)
+1748568043.767359,RECEIVED,NoLoSonIEEE-8,Este es el payload del paquete UDP 8,('192.168.100.36', 42360)
+1748568044.791273,RECEIVED,NoLoSonIEEE-9,Este es el payload del paquete UDP 9,('192.168.100.36', 42360)
+1748568045.814890,RECEIVED,NoLoSonIEEE-10,Este es el payload del paquete UDP 10,('192.168.100.36', 42360)
+```
+
+#### 3.2.4 Cálculo de Métricas de Conexión (Punto 2c)
+
+Para la comunicación UDP, el script `udp_client.py` también calculó métricas de rendimiento. Es importante destacar que, dado que UDP es un protocolo no confiable y no incluye ACKs inherentes, las métricas de latencia y jitter se basan en los ACKs implementados a nivel de aplicación, es decir, el tiempo transcurrido entre el envío de un datagrama UDP y la recepción de su correspondiente ACK UDP enviado por el servidor. Además, se estima la pérdida de paquetes.
+
+
+*   **Latencia Promedio (basada en ACKs recibidos):**
+    Representa el tiempo promedio que tardó un datagrama UDP en llegar al servidor y su ACK (de aplicación) en retornar al cliente, considerando solo los paquetes para los cuales se recibió un ACK.
+    *   **Fórmula Matemática:**
+        $\text{Latencia Promedio} = \frac{\sum_{j=1}^{N_{ACK}} \text{Latencia}_j}{N_{ACK}}$
+        Donde $Latencia_j$ es la latencia individual del datagrama $j$ cuyo ACK fue recibido, y $N_{ACK}$ es el número total de ACKs recibidos.
+    *   **Paralelismo con el Código:** En el script `udp_client.py`, la función `calculate_metrics` opera sobre la lista `latencies`, que solo se puebla cuando se recibe un ACK (`latency = ack_receive_timestamp - send_timestamp`). El cálculo `statistics.mean(latencies)` entonces corresponde a esta fórmula.
+*   **Latencia Máxima (basada en ACKs recibidos):**
+    El valor más alto de RTT (basado en ACKs de aplicación) observado entre los datagramas que recibieron respuesta.
+    *   **Fórmula Matemática:**
+        $\text{Latencia Máxima} = \max(\text{Latencia}_1, \text{Latencia}_2, \dots, \text{Latencia}_{N_{ACK}})$
+    *   **Paralelismo con el Código:** Calculado con `max(latencies)` en `calculate_metrics`.
+
+*   **Latencia Mínima (basada en ACKs recibidos):**
+    El valor más bajo de RTT (basado en ACKs de aplicación) observado.
+    *   **Fórmula Matemática:**
+        $\text{Latencia Mínima} = \min(\text{Latencia}_1, \text{Latencia}_2, \dots, \text{Latencia}_{N_{ACK}})$
+    *   **Paralelismo con el Código:** Calculado con `min(latencies)` en `calculate_metrics`.
+*   **Jitter Promedio (basado en ACKs recibidos):**
+    La variación promedio en el retardo entre los ACKs de datagramas sucesivos que fueron recibidos.
+    *   **Fórmula Matemática:**
+        Similar a TCP, pero usando las latencias de los ACKs UDP recibidos:
+        $\text{Jitter}_j = |\text{Latencia}_j - \text{Latencia}_{j-1}|$ (para ACKs consecutivos)
+        $\text{Jitter Promedio} = \frac{\sum_{k=1}^{M_{ACK}} \text{Jitter}_k}{M_{ACK}}$
+        Donde $M_{ACK}$ es el número de valores de jitter calculados a partir de los $N_{ACK}$ ACKs recibidos (sería $N_{ACK}-1$).
+    *   **Paralelismo con el Código:** Similar a TCP, se calcula con `jitters = [abs(latencies[i] - latencies[i-1]) for i in range(1, len(latencies))]` y luego `statistics.mean(jitters)`, donde `latencies` solo contiene las latencias de los ACKs recibidos.
+
+*   **Pérdida de Paquetes Estimada:**
+    Dado que UDP no garantiza la entrega, es crucial estimar cuántos paquetes se perdieron. Esta estimación se basa en la diferencia entre los paquetes que el cliente intentó enviar (y registró como `sendto` exitoso) y los ACKs que recibió del servidor.
+    *   **Fórmula Matemática:**
+        $\text{Pérdida de Paquetes (\%)} = \left( \frac{\text{Paquetes Enviados Exitosamente} - \text{ACKs Recibidos}}{\text{Paquetes Enviados Exitosamente}} \right) \times 100$ (Si $\text{Paquetes Enviados Exitosamente}> 0$).
+    *   **Paralelismo con el Código:** En `udp_client.py`, se calcula como:
+      ```python
+      packet_loss_percentage = 0.0
+      if packets_sent_successfully > 0:
+          packet_loss_percentage = ((packets_sent_successfully - acks_received) / packets_sent_successfully) * 100
+      ```
+      Donde `packets_sent_successfully` cuenta los `sendto()` que no fallaron y `acks_received` cuenta los ACKs obtenidos.
+
+Las métricas obtenidas para UDP, basadas en 100 datagramas enviados y sus ACKs, fueron:
+*   **Latencia Promedio (basada en ACKs recibidos):** `24.44 ms`
+*   **Latencia Máxima:** `146.16 ms`
+*   **Latencia Mínima:** `2.81 ms`
+*   **Jitter Promedio:** `11.34 ms`
+*   **Pérdida de Paquetes Estimada:** `0.00%` (en este entorno de prueba particular)
+
+Estas métricas proporcionan una visión del rendimiento de UDP, destacando que, aunque en esta prueba no hubo pérdidas, la posibilidad inherente al protocolo debe considerarse.
