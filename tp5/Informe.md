@@ -313,7 +313,6 @@ Timestamp,Direction,MessageID,Data,ClientAddr
 
 Para la comunicación UDP, el script `udp_client.py` también calculó métricas de rendimiento. Es importante destacar que, dado que UDP es un protocolo no confiable y no incluye ACKs inherentes, las métricas de latencia y jitter se basan en los ACKs implementados a nivel de aplicación, es decir, el tiempo transcurrido entre el envío de un datagrama UDP y la recepción de su correspondiente ACK UDP enviado por el servidor. Además, se estima la pérdida de paquetes.
 
-
 *   **Latencia Promedio (basada en ACKs recibidos):**
     Representa el tiempo promedio que tardó un datagrama UDP en llegar al servidor y su ACK (de aplicación) en retornar al cliente, considerando solo los paquetes para los cuales se recibió un ACK.
     *   **Fórmula Matemática:**
@@ -360,3 +359,96 @@ Las métricas obtenidas para UDP, basadas en 100 datagramas enviados y sus ACKs,
 *   **Pérdida de Paquetes Estimada:** `0.00%` (en este entorno de prueba particular)
 
 Estas métricas proporcionan una visión del rendimiento de UDP, destacando que, aunque en esta prueba no hubo pérdidas, la posibilidad inherente al protocolo debe considerarse.
+
+### 3.3 Comparación entre TCP y UDP (Punto 3)
+
+Tras analizar individualmente las comunicaciones TCP y UDP, se procedió a una comparación directa basada en las capturas de Wireshark y las métricas obtenidas.
+
+#### 3.3.1 Diferencias en Encabezados de Paquete
+
+Al observar los paquetes capturados en Wireshark, las diferencias estructurales entre los encabezados TCP y UDP son notables:
+
+*   **Encabezado TCP:** El encabezado TCP es más complejo e incluye campos cruciales para la comunicación orientada a conexión y confiable, tales como:
+    *   Puertos de Origen y Destino.
+    *   Número de Secuencia: Para ordenar los segmentos.
+    *   Número de Acuse de Recibo: Para confirmar la recepción de datos.
+    *   Flags (SYN, ACK, FIN, RST, PSH, URG): Para controlar el estado de la conexión.
+    *   Tamaño de Ventana: Para el control de flujo.
+    *   Checksum: Para la detección de errores en el encabezado y los datos.
+    *   Puntero Urgente y Opciones.
+
+*   **Encabezado UDP:** El encabezado UDP es significativamente más simple, reflejando su naturaleza no orientada a conexión y de "mejor esfuerzo":
+    *   Puerto de Origen y Destino.
+    *   Longitud: Longitud total del datagrama.
+    *   Checksum: Para la detección de errores.
+
+
+#### 3.3.2 Tabla Comparativa de Métricas
+
+La siguiente tabla resume las métricas de rendimiento obtenidas para TCP y UDP en las pruebas realizadas:
+
+| Métrica                     | TCP  | UDP |
+| :-------------------------- | :---------------------------- | :---------------------------- |
+| Latencia Promedio           | `24.05 ms` | `24.44 ms` |
+| Latencia Máxima             | `128.79 ms`      | `146.16 ms`      |
+| Latencia Mínima             | `1.93 ms`      | `2.81 ms`      |
+| Jitter Promedio             | `10.58 ms`       | `11.34 ms`       |
+
+<center>
+
+*Tabla 3.3. Tabla Comparativa de Rendimiento TCP vs UDP*
+</center>
+
+**Análisis de las Métricas:**
+
+Al analizar los resultados obtenidos, se pueden extraer varias observaciones interesantes sobre el comportamiento de TCP y UDP en el entorno de prueba configurado:
+
+1.  **Latencia Promedio:** Se observa que la latencia promedio para UDP (`24.44 ms`) fue ligeramente superior a la de TCP (`24.05 ms`). Aunque a menudo se espera que UDP tenga menor latencia debido a su menor overhead, en este caso la diferencia es mínima y podría estar influenciada por factores como la carga de la red local en el momento de la prueba o la forma en que se implementó el sistema de ACKs para UDP en nuestros scripts.
+
+2.  **Latencias Máxima y Mínima:** TCP presentó tanto la latencia mínima más baja (`1.93 ms` vs `2.81 ms` de UDP) como una latencia máxima también ligeramente inferior (`128.79 ms` vs `146.16 ms` de UDP). Esto podría sugerir que, en esta prueba particular, la gestión de la conexión y el flujo de datos de TCP resultó en una variabilidad general un poco menor en los extremos, aunque las latencias máximas para ambos son considerablemente más altas que las promedio, indicando picos ocasionales de demora en la red.
+
+3.  **Jitter Promedio:** El jitter promedio fue muy similar para ambos protocolos, con TCP registrando `10.58 ms` y UDP `11.34 ms`. Esto indica que la variación en el retardo entre paquetes sucesivos fue comparable en ambas pruebas.
+
+4.  **Pérdida de Paquetes:** Un punto crucial de diferencia es la pérdida de paquetes. En las pruebas realizadas, TCP no presentó pérdida de paquetes, lo cual es consistente con sus mecanismos de control de errores y retransmisión diseñados para garantizar una entrega confiable. Para UDP, el log del cliente (`udp_client_log.txt`) indicó una pérdida de paquetes estimada del `0.00%`. Si bien en esta instancia no hubo pérdidas, es fundamental recordar que UDP no garantiza la entrega, y este resultado podría variar significativamente en redes menos estables o más congestionadas. La ausencia de pérdidas en este caso particular en una red local es plausible.
+
+En conclusión, si bien las diferencias en latencia y jitter fueron mínimas en este entorno controlado y con la implementación de ACKs para UDP, la principal distinción teórica y práctica sigue siendo la confiabilidad. TCP ofrece entrega garantizada y ordenada, ideal para aplicaciones donde la integridad de los datos es primordial (transferencia de archivos, navegación web). UDP, con su menor overhead, sigue siendo preferido para aplicaciones donde la velocidad es crítica y se puede tolerar o manejar a nivel de aplicación cierta pérdida de datos (streaming, juegos en tiempo real, DNS). Las métricas obtenidas en este entorno local no muestran una ventaja clara de latencia para UDP, probablemente debido al mecanismo de ACK implementado para la medición.
+
+### 3.4 Encriptación de la Comunicación (Punto 4)
+
+Para abordar la seguridad de los datos transmitidos, se exploró e implementó la encriptación de la carga útil.
+
+#### 3.4.1 Diferencias entre Encriptado Simétrico y Asimétrico (Punto 4a)
+
+La encriptación es un pilar fundamental de la seguridad informática, utilizada para proteger la confidencialidad de la información tanto en almacenamiento como en tránsito. Existen dos categorías principales de algoritmos de encriptación basados en el tipo de claves que utilizan: simétrica y asimétrica.
+
+**Encriptación Simétrica:**
+También conocida como encriptación de clave secreta o de clave única, la encriptación simétrica utiliza la **misma clave** para realizar tanto el proceso de cifrado como el de descifrado. Ambas partes comunicantes deben poseer esta clave secreta y mantenerla protegida.
+
+*   **Ventajas:**
+    *   **Velocidad y Eficiencia:** Los algoritmos simétricos son generalmente mucho más rápidos y menos exigentes computacionalmente que los asimétricos. Esto los hace ideales para cifrar grandes volúmenes de datos, como archivos completos o flujos continuos de información.
+*   **Desventajas:**
+    *   **Distribución Segura de la Clave:** El principal desafío de la encriptación simétrica radica en cómo compartir la clave secreta de forma segura entre las partes comunicantes. Si la clave se transmite por un canal inseguro, puede ser interceptada, comprometiendo toda la comunicación cifrada con ella.
+    *   **Gestión de Claves:** En sistemas con muchos usuarios, la cantidad de claves únicas necesarias puede volverse difícil de gestionar.
+    *   **No Repudio:** Por sí misma, la encriptación simétrica no proporciona no repudio. Dado que ambas partes conocen la misma clave, no se puede probar criptográficamente cuál de ellas originó un mensaje específico si la clave es compartida entre solo dos entidades.
+*   **Ejemplos Comunes:** AES (Advanced Encryption Standard), DES (Data Encryption Standard), 3DES (Triple DES), Blowfish, RC4, y la especificación Fernet (utilizada en este trabajo práctico, que internamente usa AES).
+
+**Encriptación Asimétrica:**
+También denominada encriptación de clave pública, la encriptación asimétrica utiliza un **par de claves matemáticamente relacionadas**: una **clave pública** y una **clave privada**.
+*   La clave pública puede ser distribuida libremente sin comprometer la seguridad.
+*   La clave privada debe ser mantenida en secreto por su propietario.
+Los datos cifrados con la clave pública solo pueden ser descifrados con la clave privada correspondiente, y viceversa (aunque este último caso se usa más comúnmente para firmas digitales que para confidencialidad).
+
+*   **Ventajas:**
+    *   **Resolución del Problema de Distribución de Claves:** Elimina la necesidad de compartir una clave secreta por un canal previo. Cualquiera puede obtener la clave pública de un destinatario para enviarle un mensaje cifrado que solo él podrá leer.
+    *   **Autenticación y Firmas Digitales:** Permite verificar la identidad del remitente. Si un mensaje se cifra con la clave privada de alguien, cualquiera con la clave pública correspondiente puede verificar que el mensaje provino de esa persona y no ha sido alterado.
+    *   **No Repudio:** Las firmas digitales proporcionan no repudio, ya que solo el poseedor de la clave privada pudo haber creado la firma.
+*   **Desventajas:**
+    *   **Lentitud y Costo Computacional:** Los algoritmos asimétricos son significativamente más lentos y consumen más recursos computacionales que los simétricos. No son prácticos para cifrar grandes cantidades de datos directamente.
+*   **Ejemplos Comunes:** RSA (Rivest-Shamir-Adleman), ECC (Elliptic Curve Cryptography), Diffie-Hellman (aunque es un protocolo de acuerdo de claves, no de encriptación directa de mensajes, se basa en principios asimétricos), ElGamal.
+
+**Sistemas Híbridos:**
+En la práctica, muchas aplicaciones de seguridad utilizan un **enfoque híbrido** que combina las fortalezas de ambos tipos de encriptación.
+Típicamente, la encriptación asimétrica se utiliza durante la fase inicial de establecimiento de la comunicación para:
+1.  Autenticar a las partes.
+2.  Intercambiar de forma segura una **clave de sesión simétrica** generada aleatoriamente.
+Una vez que ambas partes comparten esta clave de sesión simétrica, toda la comunicación de datos subsiguiente se cifra utilizando un algoritmo simétrico, aprovechando su velocidad y eficiencia. Esto proporciona una solución robusta que es tanto segura en el intercambio de claves como eficiente para la transmisión de datos.
