@@ -452,3 +452,154 @@ Típicamente, la encriptación asimétrica se utiliza durante la fase inicial de
 1.  Autenticar a las partes.
 2.  Intercambiar de forma segura una **clave de sesión simétrica** generada aleatoriamente.
 Una vez que ambas partes comparten esta clave de sesión simétrica, toda la comunicación de datos subsiguiente se cifra utilizando un algoritmo simétrico, aprovechando su velocidad y eficiencia. Esto proporciona una solución robusta que es tanto segura en el intercambio de claves como eficiente para la transmisión de datos.
+
+#### 3.4.2 Librería de Encriptación Implementada: Fernet (Punto 4b)
+
+Para la encriptación de la carga útil en los scripts TCP y UDP, se seleccionó `Fernet`, una especificación de encriptación simétrica de alto nivel disponible en la librería `cryptography` de Python.
+
+**Características Principales de Fernet:**
+*   **Simétrica:** Utiliza la misma clave para encriptar y desencriptar.
+*   **Seguridad "Sellada":** Está diseñada para ser fácil de usar correctamente y difícil de usar incorrectamente, proporcionando un buen nivel de seguridad por defecto.
+*   **Algoritmos Subyacentes:** Utiliza AES de 128 bits en modo CBC (Cipher Block Chaining) para la encriptación de los datos.
+*   **Autenticación e Integridad:** Emplea HMAC (Hash-based Message Authentication Code) con SHA256 para asegurar que los datos no solo estén encriptados, sino que también no hayan sido alterados.
+*   **Prevención de Replay (Parcial):** Incluye un timestamp en el mensaje cifrado, lo que ayuda a mitigar algunos ataques de replay.
+*   **Generación de Claves:** Proporciona una función `Fernet.generate_key()` para crear claves seguras y aleatorias en el formato correcto.
+
+La implementación consistió en:
+1.  Generar una clave Fernet única utilizando el script `Codigos/code_gene.py`.
+2.  Almacenar esta clave como bytes en los archivos `config_server.py` y `config_client.py`.
+3.  En cada script, se añadió una variable booleana `ENCRYPT`. Si esta era `True`, se inicializaba un objeto `Fernet` con la clave compartida.
+4.  Antes de enviar datos, la carga útil se codificaba a bytes y luego se encriptaba con `cipher_suite.encrypt()`.
+5.  Al recibir datos, los bytes encriptados se desencriptaban con `cipher_suite.decrypt()` y luego se decodificaban a una cadena de texto.
+
+#### 3.4.3 Verificación de Carga Útil Encriptada (Punto 4c)
+
+Se ejecutaron nuevamente los scripts TCP y UDP, esta vez con la variable `ENCRYPT` establecida en `True` en todos ellos. Se utilizó Wireshark para capturar el tráfico, aplicando los mismos filtros de puerto que en las pruebas sin encriptación.
+
+**Comparación para TCP**
+Al seleccionar un paquete TCP de datos enviado por el cliente, la carga útil que antes era legible ahora se presenta como una secuencia de bytes aparentemente aleatorios, como se muestra en la Figura 3.5.
+<center>
+
+![Payload TCP Encriptado](<img/Data TCP_ENC.png>)
+
+*Figura 3.5. Payload TCP Encriptado.*
+
+</center>
+
+Comparando la Figura 3.2 (payload no encriptado) y la Figura 3.5 (payload encriptado), es evidente que la información original ya no es visible directamente en la trama de red. A pesar de que los datos encriptados todavía son una secuencia de bytes, su interpretación como texto legible falla, demostrando la efectividad de la encriptación. Los logs de la aplicación, sin embargo, confirmaron que el servidor pudo desencriptar y procesar correctamente el mensaje original utilizando la clave Fernet compartida.
+
+**Comparación para UDP**
+De forma similar, para la comunicación UDP, la carga útil de los datagramas que antes era visible ahora aparece encriptada en Wireshark, como se observa en la Figura 3.6.
+
+<center>
+
+![Payload UDP Encriptado](<img/Data UDP_ENC.png>)
+
+*Figura 3.6. Payload UDP Encriptado.*
+
+</center>
+
+La comparación entre la Figura 3.4 (payload no encriptado) y la Figura 3.6 (payload encriptado) nuevamente confirma que la carga útil ha sido protegida. Al igual que con TCP, los logs del servidor UDP indicaron la correcta desencriptación y procesamiento de los datos.
+
+**Intento de Análisis Hexadecimal de Datos Encriptados**
+
+Para reforzar la idea de que los datos están efectivamente encriptados y no son simplemente una codificación diferente de texto plano, se intentó decodificar los primeros bytes hexadecimales de las cargas útiles encriptadas (Figuras 3.5 y 3.6) como si fueran caracteres ASCII/UTF-8.
+
+*   **Análisis del Payload TCP Encriptado (Figura 3.5):**
+    La data hexadecimal visible en la Figura 3.5 comienza con: `674141414141426f4951...`
+    Intentemos decodificar los primeros 10 bytes (20 caracteres hexadecimales):
+
+    <center>
+
+    | Hex | 67 | 41 | 41 | 41 | 41 | 41 | 42 | 6f | 49 | 51 |
+    |:---:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+    | Char| g  | A  | A  | A  | A  | A  | B  | o  | I  | Q  |
+
+
+    *Tabla 3.4: Intento de Mapeo Hexadecimal a Caracteres para Payload TCP Encriptado*
+    </center>
+
+    El resultado, "gAAAABoIQ", no corresponde a ninguna parte del mensaje original esperado (como "NoLoSonIEEE..."). Los primeros bytes de un token Fernet suelen ser `gAAAAA` (que es `0x674141414141` en hexadecimal, correspondiente a `gAAAAA` en Base64), indicando la versión y la estructura del token Fernet. El resto de los bytes no forman un patrón de texto legible y coherente.
+
+*   **Análisis del Payload UDP Encriptado (Figura 3.6):**
+    La data hexadecimal visible en la Figura 3.6 comienza con: `6741414141426f4f5166...`
+    Intentemos decodificar los primeros 10 bytes (20 caracteres hexadecimales):
+
+    <center>
+
+    | Hex | 67 | 41 | 41 | 41 | 41 | 42 | 6f | 4f | 51 | 66 |
+    |:---:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
+    | Char| g  | A  | A  | A  | A  | B  | o  | O  | Q  | f  |
+
+    
+    *Tabla 3.5: Intento de Mapeo Hexadecimal a Caracteres para Payload UDP Encriptado*
+    </center>
+
+    Nuevamente, el resultado "gAAAABoOQf" no es texto plano significativo y es consistente con la estructura de un token Fernet.
+
+Este análisis superficial de los primeros bytes de las cargas útiles encriptadas refuerza la conclusión de que la encriptación ha transformado los datos originales en una forma ininteligible sin la clave de desencriptación correcta, cumpliendo el objetivo de proteger la confidencialidad de la información.
+
+#### 3.4.4 Encriptación sin Intercambio Previo de Información (Punto 4d)
+
+En el escenario actual de nuestros scripts, la encriptación simétrica con Fernet se basó en la premisa de que tanto el cliente como el servidor ya poseían una clave secreta compartida (`ENCRYPTION_KEY`). Sin embargo, surge un desafío fundamental cuando dos entidades necesitan establecer una comunicación segura a través de una red insegura, especialmente si se encuentran a kilómetros de distancia y nunca han intercambiado información previamente. En tal caso, no existe un método trivial y seguro para compartir inicialmente una clave simétrica. Intentar enviar la clave simétrica sin protección la expondría a la interceptación.
+
+La solución a este dilema se encuentra en el uso de la **encriptación asimétrica para facilitar el intercambio seguro de una clave de sesión simétrica.** Una vez que esta clave de sesión simétrica se ha establecido de forma segura, la comunicación de datos subsiguiente puede utilizar la encriptación simétrica, que es más eficiente. Este es el principio fundamental detrás de protocolos como TLS/SSL, que aseguran gran parte del tráfico web.
+
+El proceso conceptual, similar a un handshake TLS simplificado, para que nuestros scripts establecieran una comunicación encriptada sin una clave precompartida sería el siguiente:
+
+1.  **Generación de Pares de Claves por el Servidor:**
+    *   El servidor, antes de aceptar conexiones o al iniciarse, generaría un par de claves asimétricas: una clave pública (`pub_S`) y una clave privada (`priv_S`) utilizando un algoritmo como RSA o ECC (Elliptic Curve Cryptography).
+    *   La clave privada (`priv_S`) se mantendría en secreto por el servidor. La clave pública (`pub_S`) estaría destinada a ser compartida.
+
+2.  **Obtención y Verificación de la Clave Pública del Servidor por el Cliente:**
+    *   Cuando el cliente desea iniciar una comunicación segura, primero necesitaría obtener la clave pública (`pub_S`) del servidor.
+    *   **El desafío crítico es la autenticidad de `pub_S`**. ¿Cómo sabe el cliente que la clave pública que recibe realmente pertenece al servidor legítimo y no a un atacante que se hace pasar por él, es decir un ataque "Man In the Middle"?
+    *   Idealmente, este problema se resuelve mediante una **Infraestructura de Clave Pública**. El servidor tendría un **Certificado Digital** emitido por una **Autoridad Certificadora** de confianza. Este certificado vincula la identidad del servidor con su clave pública y está firmado digitalmente por la CA.
+    *   El cliente, al recibir el certificado del servidor, verificaría su validez y la firma de la CA utilizando la clave pública de la CA. Si la validación es exitosa, el cliente puede confiar en la autenticidad de `pub_S`.
+
+3.  **Generación y Encriptación de la Clave de Sesión Simétrica por el Cliente:**
+    *   Una vez que el cliente confía en la clave pública del servidor (`pub_S`), el cliente generaría una nueva clave simétrica aleatoria, que llamaremos `key_sym_session`. Esta sería, por ejemplo, una clave adecuada para Fernet.
+    *   El cliente luego encriptaría esta `key_sym_session` utilizando la clave pública del servidor (`pub_S`). Solo el poseedor de la clave privada correspondiente (`priv_S`) podrá desencriptar este mensaje.
+
+4.  **Envío de la Clave de Sesión Encriptada al Servidor:**
+    *   El cliente enviaría la `key_sym_session` al servidor.
+
+5.  **Desencriptación de la Clave de Sesión por el Servidor:**
+    *   El servidor recibiría la clave de sesión encriptada.
+    *   Utilizando su propia clave privada (`priv_S`), el servidor desencriptaría el mensaje para obtener la `key_sym_session` original.
+
+6.  **Establecimiento de la Comunicación Simétrica Segura:**
+    *   En este punto, tanto el cliente como el servidor poseen la misma `key_sym_session` secreta, la cual fue transmitida de forma segura gracias a la encriptación asimétrica.
+    *   Toda la comunicación de datos subsiguiente se encriptaría y desencriptaría utilizando esta `key_sym_session` y un algoritmo simétrico eficiente como Fernet.
+
+**Implementación Conceptual en los Scripts:**
+
+Aunque no se requiere programar esta funcionalidad para el presente trabajo práctico, su implementación conceptual en los scripts involucraría:
+*   Utilizar módulos de la librería `cryptography` como `cryptography.hazmat.primitives.asymmetric.rsa` para la generación de claves públicas/privadas RSA/ECC, y para las operaciones de encriptación y desencriptación asimétrica.
+*   Modificar el inicio de la comunicación:
+    *   El servidor necesitaría una forma de enviar su clave pública (o certificado) al cliente cuando este se conecta.
+    *   El cliente necesitaría recibir esta clave pública, generar la clave de sesión Fernet, encriptarla asimétricamente y enviarla al servidor.
+    *   El servidor recibiría y desencriptaría esta clave de sesión.
+*   Una vez establecida la `key_sym_session`, los mecanismos de encriptación/desencriptación simétrica con Fernet, ya implementados en los scripts para el Punto 4c, se utilizarían con esta nueva clave de sesión dinámica en lugar de una clave precompartida en los archivos de configuración.
+
+Este enfoque híbrido aprovecha la seguridad de la criptografía asimétrica para el intercambio de claves y la eficiencia de la criptografía simétrica para la protección de los datos en tránsito.
+
+
+
+## 4. Conclusiones
+
+La realización de este trabajo práctico ha permitido consolidar de manera efectiva los conocimientos teóricos sobre los protocolos de transporte TCP y UDP, así como los fundamentos de la encriptación de datos en red, a través de su aplicación práctica mediante el desarrollo de scripts en Python y el análisis de tráfico con Wireshark.
+
+Los principales aprendizajes y resultados obtenidos son:
+
+1.  **Implementación y Funcionamiento de TCP y UDP:** Se logró desarrollar con éxito aplicaciones cliente-servidor funcionales para ambos protocolos. Se verificó la naturaleza orientada a conexión de TCP, evidenciada por el handshake de tres vías y la transmisión confiable de datos. En contraste, UDP demostró su simplicidad y menor overhead al no requerir establecimiento de conexión.
+
+2.  **Análisis de Tráfico y Carga Útil:** La utilización de Wireshark fue fundamental para visualizar la estructura de los paquetes TCP y UDP, identificar sus respectivos encabezados y, crucialmente, verificar el contenido de la carga útil transmitida. Se pudo constatar cómo la carga útil viaja en texto plano en una comunicación no encriptada.
+
+3.  **Métricas de Rendimiento:** El registro de timestamps y el cálculo de métricas como latencia y jitter proporcionaron una base cuantitativa para comparar el rendimiento de TCP y UDP. Estas métricas, aunque obtenidas en un entorno de red local, ilustran las compensaciones inherentes a cada protocolo.
+
+4.  **Encriptación de la Carga Útil:** La implementación de la encriptación simétrica con Fernet demostró ser un método efectivo para proteger la confidencialidad de la información transmitida. Al analizar el tráfico encriptado con Wireshark, se confirmó que la carga útil original ya no era discernible, siendo reemplazada por una secuencia de bytes cifrados, mientras que la aplicación en el extremo receptor pudo desencriptarla correctamente. Esto subraya la importancia de la encriptación para la seguridad en las comunicaciones.
+
+5.  **Intercambio Seguro de Claves:** La investigación teórica sobre encriptación simétrica y asimétrica reforzó la comprensión de sus respectivos roles y limitaciones, particularmente la necesidad de mecanismos como la encriptación asimétrica para el establecimiento seguro de claves de sesión simétricas en escenarios donde no existe un canal seguro preestablecido.
+
+En resumen, este trabajo práctico ha proporcionado una valiosa experiencia en la programación de sockets, el análisis de protocolos de red y la aplicación de técnicas de seguridad básicas. Los objetivos propuestos fueron cumplidos, logrando no solo la implementación funcional de los scripts sino también una comprensión más profunda de los mecanismos subyacentes que rigen la comunicación y la protección de datos en las redes de computadoras. Las habilidades adquiridas son fundamentales para el posterior estudio y desarrollo en el campo de las redes y la ciberseguridad.
